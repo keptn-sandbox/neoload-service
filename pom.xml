@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.keptn.neotys</groupId>
+	<artifactId>testexecutor</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>testexecutor</name>
+	<description>NeoLoad executor for Keptn</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<dockerimage>docker.io/hrexed/keptn_neoload</dockerimage>
+		<login>DEBUG</login>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>io.cloudevents</groupId>
+			<artifactId>cloudevents-api</artifactId>
+			<version>0.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>io.cloudevents</groupId>
+			<artifactId>http-vertx</artifactId>
+			<version>0.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.kubernetes</groupId>
+			<artifactId>client-java</artifactId>
+			<version>4.0.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.neotys.ascode/swagger-java-client -->
+		<dependency>
+			<groupId>com.neotys.ascode</groupId>
+			<artifactId>swagger-java-client</artifactId>
+			<version>1.0.5</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>5.3.1.201904271842-r</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>0.9.10</version>
+
+				<configuration>
+					<to>
+						<image>${dockerimage}</image>
+					</to>
+					<container>
+						<ports>80</ports>
+						<environment>
+							<loging-level>DEBUG</loging-level>
+						</environment>
+					</container>
+					<auth>
+						<username>${env.REGISTRY_USERNAME}</username>
+						<password>${env.REGISTRY_PASSWORD}</password>
+					</auth>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>8</source>
+					<target>8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

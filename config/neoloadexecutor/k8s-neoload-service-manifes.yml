@@ -1,0 +1,50 @@
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+  metadata:
+    name: neoload-service
+    namespace: keptn
+spec:
+  runLatest:
+    configuration:
+      build:
+        apiVersion: build.knative.dev/v1alpha1
+        kind: Build
+        metadata:
+          name: service-builder
+          namespace: keptn
+        spec:
+          serviceAccountName: build-bot
+          source:
+            git:
+              url: https://github.com/keptn/neoload-service.git
+              revision: master
+          template:
+            name: neotys
+            arguments:
+            - name: IMAGE
+              value: docker.io/hrexed/keptn_neoload:latest
+              env:
+                loging-level: INFO
+      revisionTemplate:
+        spec:
+          container:
+            image: REGISTRY_URI_PLACEHOLDER:5000/keptn/neoload-service:latest
+            env:
+              loging-level: INFO
+  ---
+  apiVersion: eventing.knative.dev/v1alpha1
+  kind: Subscription
+  metadata:
+    #todo remplace subsription
+    name: github-new-artefact-subscription
+    namespace: keptn
+  spec:
+    channel:
+      apiVersion: eventing.knative.dev/v1alpha1
+      kind: Channel
+      name: deployment-finished
+    subscriber:
+      ref:
+        apiVersion: serving.knative.dev/v1alpha1
+        kind: Service
+        name: neoload-service
