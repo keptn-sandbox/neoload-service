@@ -3,9 +3,12 @@ package com.keptn.neotys.testexecutor.EventSender;
 
 import com.keptn.neotys.testexecutor.KeptnEvents.KeptnEventFinished;
 import com.keptn.neotys.testexecutor.KeptnEvents.TestFinished;
+import com.keptn.neotys.testexecutor.cloudevent.KeptnExtensions;
+import com.keptn.neotys.testexecutor.log.KeptnLogger;
 import io.cloudevents.CloudEvent;
 import io.cloudevents.CloudEventBuilder;
 import io.cloudevents.http.reactivex.vertx.VertxCloudEvents;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpClientRequest;
 
@@ -22,15 +25,14 @@ import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 public class NeoLoadEndEvent extends AbstractVerticle {
 
     String eventid;
-    Logger logger;
+    KeptnLogger logger;
 
-    public NeoLoadEndEvent(String jsondata,String enventid) {
+    public NeoLoadEndEvent(KeptnLogger log,String enventid) {
         this.eventid=enventid;
-        LogManager.getLogManager().reset();
-        logger = LogManager.getLogManager().getLogger("");
+        logger=log;
     }
 
-    public void endevent(KeptnEventFinished data)
+    public void endevent(KeptnEventFinished data,KeptnExtensions extensions)
     {
         final HttpClientRequest request = vertx.createHttpClient().post(KEPTN_PORT, KEPTN_EVENT_HOST,KEPTN_EVENT_URL);
 
@@ -41,12 +43,13 @@ public class NeoLoadEndEvent extends AbstractVerticle {
         });
 
 // write the CloudEvent to the given HTTP Post request object
-        CloudEvent<TestFinished> cloudEvent = new CloudEventBuilder<TestFinished>()
+        CloudEvent<JsonObject> cloudEvent = new CloudEventBuilder<JsonObject>()
             .type(KEPTN_TEST_FINISHED)
             .id(this.eventid)
             .source(URI.create(NEOLOAD_SOURCE))
             .time(ZonedDateTime.now(ZoneOffset.UTC))
-            .data(new TestFinished(data.getGithuborg(),data.getProject(),data.getTeststrategy(),data.getDeploymentstrategy(),data.getStage(),data.getService(),data.getImage(),data.getTag()))
+            .data(data.toJsonObject())
+            .extension(extensions)
             .build();
 
         VertxCloudEvents.create().writeToHttpClientRequest(cloudEvent, request);

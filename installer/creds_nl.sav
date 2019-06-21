@@ -1,0 +1,7 @@
+{
+    "nlwebWebHost": "NL_WEB_HOST_PLACEHOLDER",
+    "nlwebAPIHost": "NL_API_HOST_PLACEHOLDER",
+    "nlwebUploadHost": "NL_UPLOAD_HOST_PLACEHOLDER",
+    "nlwebAPIToken": "NL_WEB_TOKEN",
+    "nlwebZoneId": "NL_WEB_ZONEID"
+}

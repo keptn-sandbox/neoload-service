@@ -31,31 +31,39 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
 1. One testing file describing the test to execute named `keptn.neoload.engine.yaml`
 
 ```yaml
-    testpipeline:
-       - step :
-          - test : 
-             - project : absolute path to the project folder 
-             - description : Load test A
-             - scenario : load_test
-             - infrastructure:  
-                 - populations :
-                     - zone 1: /path
-                     - zone 2: /path
+  - step :
+      - test :
+         - project :
+             - path  : absolute path to the project folder
+             - path :
+         - description : Load test A
+         - scenario : load_test
+         - global_infrasctructure : dede/§dede.yaml
+         - infrastructure:
+             - Local_LG :
+                 - name : lg1
+                 - name : lg2
+             - populations :
+                 - population :
+                     - name : dede
+                     - lgs :
+                        - name : lg1
  ```
 
   All github repository will then need to have the following folders :
-  ``` 
-     NeoLoad
-        - keptn.neoload.engine.yml
-        project A
-            test.yml
-            infrastructure
+  ```
+     tests
+       NeoLoad
+         - keptn.neoload.engine.yml
+           project A
+             test.yml
+             infrastructure
                 infrastructure.yml
-        project X
-            project.nlp
-            config.zip
-            ....
-            infrastructure
-                default.yml
+           project X
+              project.nlp
+              config.zip
+              ....
+           infrastructure
+              default.yml
    ``` 
 

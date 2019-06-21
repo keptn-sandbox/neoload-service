@@ -16,6 +16,13 @@
 	</properties>
 
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>io.cloudevents</groupId>
@@ -25,19 +32,25 @@
 		<dependency>
 			<groupId>io.cloudevents</groupId>
 			<artifactId>http-vertx</artifactId>
-			<version>0.2.0</version>
+			<version>0.2.1</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.fabric8/kubernetes-client -->
 		<dependency>
-			<groupId>io.kubernetes</groupId>
-			<artifactId>client-java</artifactId>
-			<version>4.0.0</version>
-			<scope>compile</scope>
+			<groupId>io.fabric8</groupId>
+			<artifactId>kubernetes-client</artifactId>
+			<version>4.3.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.24</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.neotys.ascode/swagger-java-client -->
 		<dependency>
 			<groupId>com.neotys.ascode</groupId>
 			<artifactId>swagger-java-client</artifactId>
-			<version>1.0.5</version>
+			<version>1.0.6</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
@@ -46,6 +59,20 @@
 			<artifactId>org.eclipse.jgit</artifactId>
 			<version>5.3.1.201904271842-r</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.kubernetes/client-java -->
+		<dependency>
+			<groupId>io.kubernetes</groupId>
+			<artifactId>client-java</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 
 	</dependencies>
 
@@ -54,8 +81,7 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
-				<version>0.9.10</version>
-
+				<version>1.3.0</version>
 				<configuration>
 					<to>
 						<image>${dockerimage}</image>
@@ -63,13 +89,9 @@
 					<container>
 						<ports>80</ports>
 						<environment>
-							<loging-level>DEBUG</loging-level>
+							<loging-level>${login}</loging-level>
 						</environment>
 					</container>
-					<auth>
-						<username>${env.REGISTRY_USERNAME}</username>
-						<password>${env.REGISTRY_PASSWORD}</password>
-					</auth>
 				</configuration>
 			</plugin>
 			<plugin>
