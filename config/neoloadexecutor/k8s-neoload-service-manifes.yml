@@ -16,7 +16,7 @@ spec:
           serviceAccountName: build-bot
           source:
             git:
-              url: https://github.com/keptn/neoload-service.git
+              url: https://github.com/keptn-contrib/neoload-service.git
               revision: master
           template:
             name: neotys
