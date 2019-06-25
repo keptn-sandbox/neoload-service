@@ -8,7 +8,7 @@ public class NeoLoadConfiguration {
     public static int KEPTN_PORT=80;
     public static String GITHUB="https://github.com/";
     public static String NEOLOAD_GITFOLDER="Gitfolder";
-    public static String LOGING_LEVEL_KEY="DEBUG";
+    public static String LOGING_LEVEL_KEY="logging-level";
     public static String NEOLOAD_CONFIG_FILE="keptn.neoload.engine.yml";
     public static String NEOLOAD_FOLDER="tests/NeoLoad";
 

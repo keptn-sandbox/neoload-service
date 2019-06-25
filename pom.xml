@@ -11,7 +11,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<dockerimage>docker.io/hrexed/keptn_neoload</dockerimage>
+		<dockerimage>registry.hub.docker.com/hrexed/keptn_neoload</dockerimage>
 		<login>DEBUG</login>
 	</properties>
 

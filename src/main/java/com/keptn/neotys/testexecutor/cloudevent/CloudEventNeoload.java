@@ -20,6 +20,7 @@ public class CloudEventNeoload extends AbstractVerticle {
 	private static Vertx vertx;
 
 	public void start() {
+		loger=new KeptnLogger(this.getClass().getName());
 
 		vertx.createHttpServer()
 				.requestHandler(req -> VertxCloudEvents.create().rxReadFromRequest(req,new Class[]{KeptnExtensions.class})
