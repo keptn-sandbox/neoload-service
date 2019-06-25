@@ -16,8 +16,8 @@ spec:
           container:
             image: hrexed/keptn_neoload:latest
             env:
-              - name : "logging-level"
-                value: "DEBUG"
+              - name: logging-level
+                value: DEBUG
             imagePullPolicy: Always
 ---
 apiVersion: eventing.knative.dev/v1alpha1
