@@ -89,7 +89,7 @@
 					<container>
 						<ports>80</ports>
 						<environment>
-							<loging-level>${login}</loging-level>
+							<logging-level>${login}</logging-level>
 						</environment>
 					</container>
 				</configuration>

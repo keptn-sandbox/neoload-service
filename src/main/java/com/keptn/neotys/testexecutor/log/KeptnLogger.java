@@ -3,6 +3,8 @@ package com.keptn.neotys.testexecutor.log;
 
 
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -42,16 +44,33 @@ public  class KeptnLogger  {
     public KeptnLogger(String className) {
         handler = new ConsoleHandler();
         LogManager.getLogManager().reset();
-        loger = LogManager.getLogManager().getLogger(className);
+        loger = Logger.getLogger(className);
         loger.setLevel(getLevel());
-
         handler.setLevel(getLevel());
     }
 
+    private void logenv(Map<String,String> env)
+    {
+        StringBuilder sb= new StringBuilder();
+        Iterator<Map.Entry<String, String>> itr = env.entrySet().iterator();
+        System.out.println("Environement available from neoload service");
+        while (itr.hasNext()) {
+            Map.Entry<String, String> entry = itr.next();
+            sb.append(entry.getKey());
+            sb.append('=').append('"');
+            sb.append(entry.getValue());
+            sb.append('"');
+            if (itr.hasNext()) {
+                sb.append(',').append(' ');
+            }
+        }
+        System.out.println(sb.toString());
+    }
 
 
     private Level getLevel()
     {
+
         String level=System.getenv(LOGING_LEVEL_KEY);
         switch (level.toUpperCase())
         {
