@@ -138,7 +138,7 @@ public class NeoLoadHandler {
         return compressNLProject(path.toAbsolutePath().toString(),projectName);
 
     }
-    private NeoLoadWebTest RunTest(File zipfile,NeoLoadTest test,Optional<String> nlapi,Optional<String> nlapitoken,Optional<String> nlurl,Optional<String> uploadurl,Optional<String> nlzoneid) throws ApiException, NeoLoadJgitExeption {
+    private NeoLoadWebTest RunTest(File zipfile, NeoLoadTest test, Optional<String> nlapi, Optional<String> nlapitoken, Optional<String> nlurl, Optional<String> uploadurl, Optional<String> nlzoneid, int size) throws ApiException, NeoLoadJgitExeption {
        if(!nlapi.isPresent())
            throw new NeoLoadJgitExeption("No API URL Defined. installtion of the neoload service has not been configured properly");
 
@@ -169,7 +169,7 @@ public class NeoLoadHandler {
             nlWebApiClient.setApiKey(nlapitoken.get());
             runtimeApi=new RuntimeApi(nlWebApiClient);
 
-            RunTestDefinition runTestDefinition = runtimeApi.getTestsRun(KEPTN_EVENT_URL+"_"+keptnEventFinished.getProject()+"_"+keptnEventFinished.getService()+"_"+test.getScenario(), projectDefinition.getProjectId(), test.getScenario(), test.getDescription(),getAsCodeFiles(test.getProject()),null,null,null,null,nlzoneid.get(),nlzoneid.get());
+            RunTestDefinition runTestDefinition = runtimeApi.getTestsRun(KEPTN_EVENT_URL+"_"+keptnEventFinished.getProject()+"_"+keptnEventFinished.getService()+"_"+test.getScenario(), projectDefinition.getProjectId(), test.getScenario(), test.getDescription(),getAsCodeFiles(test.getProject()),null,null,null,null,nlzoneid.get(),nlzoneid.get()+":"+String.valueOf(size));
             NeoLoadWebTest neoLoadWebTest=new NeoLoadWebTest(runTestDefinition.getTestId(),nlurl.get() + "/#!trend/?scenario=" + test.getScenario() + "&limit=-1&project=" + projectDefinition.getProjectId(),nlurl.get() + "/#!result/" + runTestDefinition.getTestId() + "/overview");
 
 
@@ -220,7 +220,7 @@ public class NeoLoadHandler {
                 List<String> projectspath=test.getProject().stream().map(project -> project.getPath()).collect(Collectors.toList());
                 String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject());
 
-                NeoLoadWebTest loadWebTest=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),neoLoadKubernetesClient.getNeoloadZoneid());
+                NeoLoadWebTest loadWebTest=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),neoLoadKubernetesClient.getNeoloadZoneid(),machinelist.size());
                 keptnEventFinished.setTestid(loadWebTest.getTestid());
                 keptnEventFinished.setNeoloadURL(loadWebTest.getTesturl());
                 ///---
