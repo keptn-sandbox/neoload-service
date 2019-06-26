@@ -6,7 +6,7 @@ NL_API_TOKEN=$(cat creds_nl.json | jq -r '.nlwebAPIToken')
 NL_WEB_ZONEID=$(cat creds_nl.json | jq -r '.nlwebZoneId')
 NL_UPLOAD_HOST=$(cat creds_nl.json | jq -r '.nlwebUploadHost')
 # Create secrets to be used by dynatrace-service
-kubectl -n keptn create secret generic neoload --from-literal="NL_WEB_HOST=$NL_WEB_HOST" --from-literal="NL_API_HOST=$NL_API_HOST"  --from-literal="NL_API_TOKEN=$NL_API_TOKEN"--from-literal="NL_WEB_ZONEID=$NL_WEB_ZONEID" --from-literal="NL_UPLOAD_HOST=$NL_UPLOAD_HOST"
+kubectl -n keptn create secret generic neoload --from-literal="NL_WEB_HOST=$NL_WEB_HOST" --from-literal="NL_API_HOST=$NL_API_HOST"  --from-literal="NL_API_TOKEN=$NL_API_TOKEN" --from-literal="NL_WEB_ZONEID=$NL_WEB_ZONEID" --from-literal="NL_UPLOAD_HOST=$NL_UPLOAD_HOST"
 verify_kubectl $? "Creating neoload secret for keptn services failed."
 
 # Create dynatrace-service

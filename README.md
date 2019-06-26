@@ -31,13 +31,18 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
 1. One testing file describing the test to execute named `keptn.neoload.engine.yaml`
 
 ```yaml
+steps:
   - step :
       - test :
+         - stage : dev
          - project :
              - path  : absolute path to the project folder
              - path :
          - description : Load test A
          - scenario : load_test
+         - constant_variables:
+            - name : host
+              value : catalogueèservice
          - global_infrasctructure : dede/§dede.yaml
          - infrastructure:
              - Local_LG :
