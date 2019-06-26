@@ -93,7 +93,9 @@
 						<image>${dockerimage}</image>
 					</to>
 					<container>
-						<ports>${port}</ports>
+						<ports>
+							<port>${port}</port>
+						</ports>
 						<environment>
 							<logging-level>${login}</logging-level>
 							<NL_WEB_HOST>${NL_WEB_HOST}</NL_WEB_HOST>
