@@ -9,12 +9,16 @@ import java.util.List;
 //  :
 //       - step :
 //          - test :
+//             - stage : dev
 //             - project :
 //                 - path  : absolute path to the project folder
 //                 - path :
 //             - description : Load test A
 //             - scenario : load_test
 //             - global_infrasctructure : dede/§dede.yaml
+//             - constant_variables:
+//                    - name = host
+//                      value = catalogueèservice
 //             - infrastructure:
 //                 - Local_LG :
 //                     - name : lg1

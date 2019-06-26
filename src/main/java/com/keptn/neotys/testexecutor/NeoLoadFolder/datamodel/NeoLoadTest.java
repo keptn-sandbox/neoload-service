@@ -19,18 +19,38 @@ import java.util.stream.Collectors;
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 
 public class NeoLoadTest {
+    String stage;
     List<Project> project;
     String description;
     String scenario;
     Optional<Infrastructure> infrastructure;
     Optional<String> global_infrasctructure;
+    Optional<List<Constants>> constant_variables;
 
-    public NeoLoadTest(List<Project> project, String description, String scenario, Optional<Infrastructure> infrastructure, Optional<String> global_infrasctructure) {
+    public NeoLoadTest(String stage, List<Project> project, String description, String scenario, Optional<Infrastructure> infrastructure, Optional<String> global_infrasctructure, Optional<List<Constants>> constant_variables) {
+        this.stage = stage;
         this.project = project;
         this.description = description;
         this.scenario = scenario;
         this.infrastructure = infrastructure;
         this.global_infrasctructure = global_infrasctructure;
+        this.constant_variables = constant_variables;
+    }
+
+    public String getStage() {
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
+    }
+
+    public Optional<List<Constants>> getConstant_variables() {
+        return constant_variables;
+    }
+
+    public void setConstant_variables(Optional<List<Constants>> constant_variables) {
+        this.constant_variables = constant_variables;
     }
 
     public Optional<Infrastructure> getInfrastructure() {

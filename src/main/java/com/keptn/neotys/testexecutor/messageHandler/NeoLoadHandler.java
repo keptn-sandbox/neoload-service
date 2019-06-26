@@ -2,10 +2,9 @@ package com.keptn.neotys.testexecutor.messageHandler;
 
 import com.keptn.neotys.testexecutor.EventSender.NeoLoadEndEvent;
 import com.keptn.neotys.testexecutor.KeptnEvents.KeptnEventFinished;
-import com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel.NeoLoadDataModel;
-import com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel.NeoLoadTest;
-import com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel.NeoLoadTestStep;
-import com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel.Project;
+import com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel.*;
+import com.keptn.neotys.testexecutor.NeoLoadFolder.variables.NeoLoadModel;
+import com.keptn.neotys.testexecutor.NeoLoadFolder.variables.NlConstants;
 import com.keptn.neotys.testexecutor.cloudevent.KeptnExtensions;
 import com.keptn.neotys.testexecutor.exception.NeoLoadJgitExeption;
 import com.keptn.neotys.testexecutor.exception.NeoLoadSerialException;
@@ -28,6 +27,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -50,6 +50,8 @@ public class NeoLoadHandler {
     private KeptnEventFinished keptnEventFinished;
     Path gitfolder;
     private String eventid;
+    private String stage;
+    private Optional<String> tempfile;
 
     public NeoLoadHandler(KeptnEventFinished keptnEventFinishedCloudEvent, KeptnExtensions extensions, String eventid) throws IOException, NeoLoadJgitExeption {
         this.keptnEventFinished=keptnEventFinishedCloudEvent;
@@ -58,6 +60,8 @@ public class NeoLoadHandler {
         keptncontext=extensions.getShkeptncontext();
         eventid=eventid;
         gitfolder= getNeoLoadTestFolder();
+        this.stage=keptnEventFinished.getStage();
+        tempfile=Optional.empty();
     }
 
     private  String compressNLProject(String sourcefolder,String projectname) throws IOException {
@@ -100,10 +104,12 @@ public class NeoLoadHandler {
     private String getAsCodeFiles(List<Project> projectPath)
     {
         List<String> projectwithoutnlp=projectPath.stream().map(pro->{return pro.getPath();}).filter(file->!file.toLowerCase().contains(NLP_EXTENSION)).collect(Collectors.toList());
+        if(tempfile.isPresent())
+            projectwithoutnlp.add(tempfile.get());
         return projectwithoutnlp.stream().map(project->{return new File(project).getName();}).collect(Collectors.joining(","));
     }
 
-    private String createZipFile(List<String> projectPath, String projectName) throws IOException, NeoLoadJgitExeption {
+    private String createZipFile(List<String> projectPath, String projectName, Optional<List<Constants>> constant_variables) throws IOException, NeoLoadJgitExeption {
         Path path = Paths.get(gitfolder.toAbsolutePath()+"/tempneoload");
         if(!Files.exists(path))
             Files.createDirectory(path);
@@ -128,7 +134,18 @@ public class NeoLoadHandler {
                 error.add(e);
             }
         });
-        if(error.size()>0)
+        if( constant_variables.isPresent()&&constant_variables.get().size()>0)
+        {
+            NeoLoadModel model=new NeoLoadModel(constant_variables.get().stream().map(constants -> {
+                return new NlConstants(constants);
+            }).collect(Collectors.toList()));
+            Yaml yaml = new Yaml();
+            tempfile=Optional.of(path.toAbsolutePath()+"/"+keptnEventFinished.getService()+"."+keptncontext+".yaml");
+            FileWriter writer = new FileWriter(tempfile.get());
+            yaml.dump(model, writer);
+
+        }
+         if(error.size()>0)
         {
             throw new NeoLoadJgitExeption("several tecnical error : "+ error.stream().map(e -> {
                 return e.getLocalizedMessage();
@@ -217,8 +234,9 @@ public class NeoLoadHandler {
                     neoLoadKubernetesClient.deployLG(machine);
                 });
 
+
                 List<String> projectspath=test.getProject().stream().map(project -> project.getPath()).collect(Collectors.toList());
-                String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject());
+                String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject(),test.getConstant_variables());
 
                 NeoLoadWebTest loadWebTest=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),neoLoadKubernetesClient.getNeoloadZoneid(),machinelist.size());
                 keptnEventFinished.setTestid(loadWebTest.getTestid());
@@ -266,7 +284,7 @@ public class NeoLoadHandler {
 
 
         //---for each test start test -----
-        neoLoadTestStepList.stream().forEach(step->{
+        neoLoadTestStepList.stream().filter(neoLoadTestStep -> neoLoadTestStep.getStep().getStage().equalsIgnoreCase(this.stage)).forEach(step->{
             runNLScenario(step.getStep());
 
         });
