@@ -12,6 +12,11 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<dockerimage>registry.hub.docker.com/hrexed/keptn_neoload</dockerimage>
+		<NL_WEB_HOST>neoload.saas.com</NL_WEB_HOST>
+		<NL_API_HOST>neoload-api.saas.com</NL_API_HOST>
+		<NL_API_TOKEN>15304f743f34ca33c458927a40945b7424a2066b95563774</NL_API_TOKEN>
+		<NL_WEB_ZONEID>On10d</NL_WEB_ZONEID>
+		<NL_UPLOAD_HOST>neoload-files.saas.com</NL_UPLOAD_HOST>
 		<login>DEBUG</login>
 	</properties>
 
@@ -87,9 +92,14 @@
 						<image>${dockerimage}</image>
 					</to>
 					<container>
-						<ports>80</ports>
+						<ports>8080</ports>
 						<environment>
 							<logging-level>${login}</logging-level>
+							<NL_WEB_HOST>${NL_WEB_HOST}</NL_WEB_HOST>
+							<NL_API_HOST>${NL_API_HOST}</NL_API_HOST>
+							<NL_API_TOKEN>${NL_API_TOKEN}</NL_API_TOKEN>
+							<NL_WEB_ZONEID>${NL_WEB_ZONEID}</NL_WEB_ZONEID>
+							<NL_UPLOAD_HOST>${NL_UPLOAD_HOST}</NL_UPLOAD_HOST>
 						</environment>
 					</container>
 				</configuration>

@@ -52,7 +52,7 @@ echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
     rm $CREDS 2> /dev/null
-    cat ./creds_dt.sav | sed 's~NL_WEB_HOST_PLACEHOLDER~'"$NLWEB"'~' | \
+    cat ./creds_nl.sav | sed 's~NL_WEB_HOST_PLACEHOLDER~'"$NLWEB"'~' | \
       sed 's~NL_API_HOST_PLACEHOLDER~'"$NLWEBAPI"'~' | \
       sed 's~NL_UPLOAD_HOST_PLACEHOLDER~'"$NLWEBUPLOAD"'~' | \
       sed 's~NL_WEB_TOKEN~'"$NLAPI"'~'  | \

@@ -86,14 +86,13 @@ public class NeoLoadKubernetesClient {
 
     private void getSecrets()
     {
-        this.client=new DefaultKubernetesClient(config);
-        Map<String,String> neoloadsecret=client.secrets().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD_SECRET).get().getData();
-        logger.debug("Find secrets neoload : " + neoloadsecret.toString());
-        neoloadAPitoken=neoloadsecret.get(SECRET_API_TOKEN);
-        neoloadweb_apiurl=Optional.ofNullable(neoloadsecret.get(SECRET_NL_API_HOST));
-        neoloadweb_url=Optional.ofNullable(neoloadsecret.get(SECRET_NL_WEB_HOST));
-        neoloadZoneid=Optional.ofNullable(neoloadsecret.get(SECRET_NL_ZONEID));
-        neoloadweb_uploadurl=Optional.ofNullable(neoloadsecret.get(SECRET_NL_UPLOAD_HOST));
+
+        logger.debug("retrieve the environement variables for neoload  neoload service ");
+        neoloadAPitoken=System.getenv(SECRET_API_TOKEN);
+        neoloadweb_apiurl=Optional.ofNullable(System.getenv(SECRET_NL_API_HOST));
+        neoloadweb_url=Optional.ofNullable(System.getenv(SECRET_NL_WEB_HOST));
+        neoloadZoneid=Optional.ofNullable(System.getenv(SECRET_NL_ZONEID));
+        neoloadweb_uploadurl=Optional.ofNullable(System.getenv(SECRET_NL_UPLOAD_HOST));
     }
     public void deleteController()
     {
