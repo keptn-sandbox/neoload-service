@@ -44,6 +44,8 @@ spec:
                     name: neoload
                     key: NL_UPLOAD_HOST
             imagePullPolicy: Always
+            ports:
+              - containerPort: 8080
             livenessProbe:
               httpGet:
                 path: /health
