@@ -17,7 +17,7 @@
 		<NL_API_TOKEN>15304f743f34ca33c458927a40945b7424a2066b95563774</NL_API_TOKEN>
 		<NL_WEB_ZONEID>On10d</NL_WEB_ZONEID>
 		<NL_UPLOAD_HOST>neoload-files.saas.com</NL_UPLOAD_HOST>
-		<port>80</port>
+		<port>8080</port>
 		<login>DEBUG</login>
 	</properties>
 

@@ -11,5 +11,7 @@ public class NeoLoadService {
     public static void main(String[] args) {
 
         Vertx.vertx().deployVerticle(new CloudEventNeoload());
+
+
     }
 }
