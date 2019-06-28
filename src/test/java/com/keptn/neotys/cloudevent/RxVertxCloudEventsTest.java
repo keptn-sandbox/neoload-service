@@ -16,6 +16,7 @@ import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class RxVertxCloudEventsTest {
     private static Vertx vertx;
@@ -67,18 +68,22 @@ public class RxVertxCloudEventsTest {
 
         public void start() {
             vertx.createHttpServer()
-                    .requestHandler(req -> VertxCloudEvents.create().rxReadFromRequest(req, new Class[]{KeptExtension.class})
-                            .subscribe((receivedEvent, throwable) -> {
-                                if (receivedEvent != null) {
-                                    // I got a CloudEvent object:
-                                    System.out.println("The event type: " + receivedEvent.getType());
-                                    System.out.println(receivedEvent.getData().get().getClass());
+                    .requestHandler(req ->
+                    {
+                        System.out.println(req.headers().entries().stream().map(Object::toString).collect(Collectors.joining(",")));
+                        VertxCloudEvents.create().rxReadFromRequest(req, new Class[]{KeptExtension.class})
+                                .subscribe((receivedEvent, throwable) -> {
+                                    if (receivedEvent != null) {
+                                        // I got a CloudEvent object:
+                                        System.out.println("The event type: " + receivedEvent.getType());
+                                        System.out.println(receivedEvent.getData().get().getClass());
 
-                                    System.out.println(receivedEvent.getData().toString());
-                                    receivedEvent.getExtensions()
-                                            .ifPresent(extensions -> extensions.forEach(System.out::println));
-                                }
-                            }))
+                                        System.out.println(receivedEvent.getData().toString());
+                                        receivedEvent.getExtensions()
+                                                .ifPresent(extensions -> extensions.forEach(System.out::println));
+                                    }
+                                });
+                    })
                     .rxListen(4444)
                     .subscribe(server -> {
                         System.out.println("Server running!");

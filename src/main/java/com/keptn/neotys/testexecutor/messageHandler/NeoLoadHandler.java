@@ -279,7 +279,7 @@ public class NeoLoadHandler {
     }
 
     public void runNeoLoadTest() throws NeoLoadJgitExeption, NeoLoadSerialException, IOException {
-        gitfolder = getNeoLoadTestFolder();
+       // gitfolder = getNeoLoadTestFolder();
         List<NeoLoadTestStep> neoLoadTestStepList=getNeoLoadTest();
 
 
@@ -296,10 +296,10 @@ public class NeoLoadHandler {
         {
             logger.debug("getNeoLoadTest - loading yaml file "+gitfolder.toAbsolutePath()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
             Yaml yaml = new Yaml(new Constructor(NeoLoadDataModel.class));
-            InputStream inputStream = this.getClass()
-                    .getClassLoader()
-                    .getResourceAsStream(gitfolder.toAbsolutePath()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
-            NeoLoadDataModel neoLoadDataModel = yaml.load(inputStream);
+//            InputStream inputStream = this.getClass()
+  //                  .getClassLoader()
+    //                .getResourceAsStream(gitfolder.toAbsolutePath().toString()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
+            NeoLoadDataModel neoLoadDataModel = yaml.load(gitfolder.toAbsolutePath().toString()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
             if(neoLoadDataModel==null) {
                 logger.debug("getNeoLoadTest - no able to deserialize the yaml file");
                 throw new NeoLoadSerialException("Unable to deserialize YAML file ");
@@ -329,7 +329,7 @@ public class NeoLoadHandler {
                 Git result = Git.cloneRepository()
                         .setURI(getGitHubFolder())
                         .setDirectory(localPath.toFile())
-                        .setBranch(keptnEventFinished.getStage())
+                        //.setBranch(keptnEventFinished.getStage())
                         .call();
 
                 logger.debug("getNeoLoadTestFolder - end clonning repo  "+getGitHubFolder());
@@ -371,8 +371,8 @@ public class NeoLoadHandler {
 
     private boolean hasNeoLoadFolder(Path path)
     {
-        File NeoLoadPath= new File(path.toAbsolutePath()+"/"+ NEOLOAD_FOLDER);
-        if(NeoLoadPath.exists())
+        File dir=new File(path.toAbsolutePath().toString() + "/" + NEOLOAD_FOLDER);
+        if(dir.exists())
             return true;
         else
             return false;
@@ -380,7 +380,7 @@ public class NeoLoadHandler {
 
     private boolean hasNeoLoadKeptn(Path path)
     {
-        File neoloadConfigFile = new File(path.toAbsolutePath()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
+        File neoloadConfigFile = new File(path.toAbsolutePath().toString()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
         if(neoloadConfigFile.exists())
             return true;
         else

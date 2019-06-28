@@ -43,10 +43,12 @@ public  class KeptnLogger  {
 
     public KeptnLogger(String className) {
         handler = new ConsoleHandler();
-        LogManager.getLogManager().reset();
         loger = Logger.getLogger(className);
-        loger.setLevel(getLevel());
+        loger.setUseParentHandlers(false);
+        loger.addHandler(handler);
         handler.setLevel(getLevel());
+        loger.setLevel(getLevel());
+
     }
 
     private void logenv(Map<String,String> env)

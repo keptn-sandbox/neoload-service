@@ -11,8 +11,11 @@ public class NeoLoadConfiguration {
     public static String GITHUB="https://github.com/";
     public static String NEOLOAD_GITFOLDER="Gitfolder";
     public static String LOGING_LEVEL_KEY="logging-level";
-    public static String NEOLOAD_CONFIG_FILE="keptn.neoload.engine.yml";
-    public static String NEOLOAD_FOLDER="tests/NeoLoad";
+    public static String NEOLOAD_CONFIG_FILE="keptn.neoload.engine.yaml";
+    public static String NEOLOAD_FOLDER="tests/neoload";
+
+    public static String HEADER_KEPTNCONTEXT="shkeptncontext";
+    public static String HEADER_datacontentype="datacontenttype";
 
     public static final String YML_EXTENSION=".yml";
     public static final String YAML_EXTENSION=".yaml";

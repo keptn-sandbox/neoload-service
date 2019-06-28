@@ -22,6 +22,6 @@ public class KeptnLoggerFormater extends Formatter {
 
     @Override
     public String format(LogRecord record) {
-        return String.format(messageFormat,keptnContext,record.getLevel(), record.getMillis() +" :" + record.getSourceClassName() +" - " +record.getSourceMethodName() + " - "+  record.getMessage());
+        return String.format(messageFormat,keptnContext,record.getLevel().getName(), record.getMillis() +" :" + record.getSourceClassName() +" - " +record.getSourceMethodName() + " - "+  record.getMessage());
     }
 }

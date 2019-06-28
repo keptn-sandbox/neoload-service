@@ -32,27 +32,25 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
 
 ```yaml
 steps:
-  - step :
-      - test :
-         - stage : dev
-         - project :
-             - path  : absolute path to the project folder
-             - path :
-         - description : Load test A
-         - scenario : load_test
-         - constant_variables:
-            - name : host
-              value : catalogueèservice
-         - global_infrasctructure : dede/§dede.yaml
-         - infrastructure:
-             - Local_LG :
-                 - name : lg1
-                 - name : lg2
-             - populations :
-                 - population :
-                     - name : dede
-                     - lgs :
-                        - name : lg1
+- step :
+    stage : dev
+    project :
+    - path  : /tests/neoload/catalogue_neoload.yaml
+    description : BasicCheck
+    scenario : BasicCheck
+    constant_variables:
+    - name : server_host
+      value : catalog-service.orders-project-dev.svc
+    - name: server_port
+      value: 8080
+    infrastructure:
+      Local_LG :
+      - name : lg1
+      populations :
+      - population :
+        name : BasicCheck
+        lgs :
+        - name : lg1
  ```
 
   All github repository will then need to have the following folders :
