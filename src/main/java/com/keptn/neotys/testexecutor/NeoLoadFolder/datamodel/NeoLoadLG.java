@@ -3,7 +3,10 @@ package com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel;
 public class NeoLoadLG {
     String name;
 
-    public String getName() {
+	public NeoLoadLG() {
+	}
+
+	public String getName() {
         return name;
     }
 

@@ -14,8 +14,10 @@ import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 public class Project {
     String path;
 
+	public Project() {
+	}
 
-    public Project(String path) {
+	public Project(String path) {
         this.path = path;
     }
 
@@ -47,5 +49,10 @@ public class Project {
             return false;
     }
 
-
+	@Override
+	public String toString() {
+		return "Project{" +
+				"path='" + path + '\'' +
+				'}';
+	}
 }

@@ -1,9 +1,7 @@
 package com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel;
 
 
-import com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel.NeoLoadTest;
-import com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel.NeoLoadTestStep;
-
+import java.util.ArrayList;
 import java.util.List;
 
 //  :
@@ -20,7 +18,7 @@ import java.util.List;
 //                    - name = host
 //                      value = catalogueèservice
 //             - infrastructure:
-//                 - Local_LG :
+//                 - local_LG :
 //                     - name : lg1
 //                     - name : lg2
 //                 - populations :
@@ -29,17 +27,28 @@ import java.util.List;
 //                            - lgs :
 //                                - name : lg1
 public class NeoLoadDataModel {
-    List<NeoLoadTestStep> steps;
+	List<NeoLoadTestStep> steps;
 
-    public NeoLoadDataModel(List<NeoLoadTestStep> steps) {
-        this.steps = steps;
-    }
+	public NeoLoadDataModel() {
+		steps = new ArrayList<>();
+	}
 
-    public List<NeoLoadTestStep> getSteps() {
-        return steps;
-    }
+	public NeoLoadDataModel(List<NeoLoadTestStep> steps) {
+		this.steps = steps;
+	}
 
-    public void setSteps(List<NeoLoadTestStep> steps) {
-        this.steps = steps;
-    }
+	public List<NeoLoadTestStep> getSteps() {
+		return steps;
+	}
+
+	public void setSteps(List<NeoLoadTestStep> steps) {
+		this.steps = steps;
+	}
+
+	@Override
+	public String toString() {
+		return "NeoLoadDataModel{" +
+				"steps=" + steps +
+				'}';
+	}
 }

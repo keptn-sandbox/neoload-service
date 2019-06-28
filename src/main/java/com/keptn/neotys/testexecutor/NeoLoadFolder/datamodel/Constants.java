@@ -4,7 +4,10 @@ public class Constants {
     private String  name;
     private String value;
 
-    public Constants(String name, String value) {
+	public Constants() {
+	}
+
+	public Constants(String name, String value) {
         this.name = name;
         this.value = value;
     }

@@ -1,13 +1,17 @@
 package com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Population {
     String name;
     List<NeoLoadLG> lgs;
 
+	public Population() {
+		lgs = new ArrayList<>();
+	}
 
-    public Population(String name, List<NeoLoadLG> lgs) {
+	public Population(String name, List<NeoLoadLG> lgs) {
         this.name = name;
         this.lgs = lgs;
     }
