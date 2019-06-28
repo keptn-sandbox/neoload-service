@@ -7,24 +7,29 @@ To trigger a NeoLoad test, the service has subscriptions to event channels. In m
 
 ## Secret for credentials
 During the setup of NeoLaod, a secret is created that contains key-value pairs for the NeoLoad  URL, NeoLoad apiKey:
-* neoloadWebURL="$NEOLOAD_URL" 
-* neoloadAPIKEY="$NEOLOAD_APIKEY" 
+   * NL_WEB_HOST 
+   * NL_API_HOST 
+   * NL_UPLOAD_HOST
+   * NL_API_TOKEN
+   * NL_WEB_ZONEID 
+
 
 
 
 ## Install service <a id="install"></a>
 
-1. To install the service, specify values for the following parameters:
-    * REGISTRY_URL - URL of the container registry
-    * GITHUB_USER_EMAIL - Email of GitHub user
-    * GITHUB_ORGANIZATION - GitHub organization used by keptn
-    * GITHUB_PERSONAL_ACCESS_TOKEN - Personal access token from GitHub user
-
+1. To install the service, you need to run :
+ * installer/defineNeoLoadWebCredentials.sh to configure the required parameters :
+    1. NL_WEB_HOST : host of the web ui of NeoLoad web
+    1. NL_API_HOST : host of the api of NeoLoad web
+    1. NL_UPLOAD_HOST : host of upload api of NeoLoad Web
+    1. NL_API_TOKEN: api token of your NeoLoad account
+    1. NL_WEB_ZONEID : NeoLoad Web Zone id that would be used by Keptn
 
 
 ## The NeoLoad Service requires to have the following folders in the github service repository
 
-1. Neoload Folder containing all the neoload tests. The NeoLaod folder will have :
+1. "neoload" Folder containing all the neoload tests. The NeoLaod folder will have :
 
 1. One folder for each NeoLoad project  (nlp or yaml file) containing the NeoLaod infrastructure files ( deployments of LG pods)
 
@@ -55,7 +60,7 @@ steps:
   All github repository will then need to have the following folders :
   ```
      tests
-       NeoLoad
+       neoload
          - keptn.neoload.engine.yml
            project A
              test.yml
