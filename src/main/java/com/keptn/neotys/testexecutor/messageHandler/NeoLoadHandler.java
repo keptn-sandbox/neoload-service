@@ -15,21 +15,16 @@ import com.neotys.ascode.swagger.client.ApiException;
 import com.neotys.ascode.swagger.client.api.RuntimeApi;
 import com.neotys.ascode.swagger.client.model.ProjectDefinition;
 import com.neotys.ascode.swagger.client.model.RunTestDefinition;
-import io.cloudevents.CloudEvent;
-import io.vertx.core.json.JsonObject;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.apache.commons.io.FileUtils;
-
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -236,7 +231,7 @@ public class NeoLoadHandler {
 
 
                 List<String> projectspath=test.getProject().stream().map(project -> project.getPath()).collect(Collectors.toList());
-                String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject(),test.getConstant_variables());
+                String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject(),Optional.ofNullable(test.getConstant_variables()));
 
                 NeoLoadWebTest loadWebTest=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),neoLoadKubernetesClient.getNeoloadZoneid(),machinelist.size());
                 keptnEventFinished.setTestid(loadWebTest.getTestid());
@@ -291,15 +286,13 @@ public class NeoLoadHandler {
 
         deleteGitFolder();
     }
-    private List<NeoLoadTestStep> getNeoLoadTest() throws NeoLoadJgitExeption, NeoLoadSerialException {
+    private List<NeoLoadTestStep> getNeoLoadTest() throws NeoLoadJgitExeption, NeoLoadSerialException, IOException {
         if(gitfolder!=null)
         {
             logger.debug("getNeoLoadTest - loading yaml file "+gitfolder.toAbsolutePath()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
-            Yaml yaml = new Yaml(new Constructor(NeoLoadDataModel.class));
-//            InputStream inputStream = this.getClass()
-  //                  .getClassLoader()
-    //                .getResourceAsStream(gitfolder.toAbsolutePath().toString()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
-            NeoLoadDataModel neoLoadDataModel = yaml.load(gitfolder.toAbsolutePath().toString()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
+
+	        final String yamlFile = Files.readAllLines(Paths.get(gitfolder.toAbsolutePath().toString(), NEOLOAD_FOLDER, NEOLOAD_CONFIG_FILE)).stream().collect(Collectors.joining("\n"));
+	        NeoLoadDataModel neoLoadDataModel = new Yaml().loadAs(yamlFile, NeoLoadDataModel.class);
             if(neoLoadDataModel==null) {
                 logger.debug("getNeoLoadTest - no able to deserialize the yaml file");
                 throw new NeoLoadSerialException("Unable to deserialize YAML file ");
@@ -310,8 +303,8 @@ public class NeoLoadHandler {
                 throw new NeoLoadJgitExeption("There is no testing steps define ");
             }
 
-
-            return neoLoadDataModel.getSteps();
+	        final ArrayList<NeoLoadTestStep> neoLoadTestSteps = new ArrayList<>();
+	        return neoLoadDataModel.getSteps();
 
         }
         else throw  new NeoLoadJgitExeption("no git folder define ");
