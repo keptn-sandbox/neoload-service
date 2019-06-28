@@ -10,8 +10,11 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -118,7 +121,7 @@ public class NeoLoadTest {
 	}
 
 
-	public boolean checkProject(Path gitfolder) throws NeoLoadJgitExeption, NeoLoadSerialException {
+	public boolean checkProject(Path gitfolder) throws NeoLoadJgitExeption, NeoLoadSerialException, IOException {
 		if (project.size() <= 0)
 			throw new NeoLoadJgitExeption("you need to refer to at least one project  ");
 		else {
@@ -193,7 +196,7 @@ public class NeoLoadTest {
 
 	}
 
-	public List<String> getNameOfLGtoStart(Path gitFolder) throws NeoLoadSerialException {
+	public List<String> getNameOfLGtoStart(Path gitFolder) throws NeoLoadSerialException, IOException {
 		List<String> machinenameList = new ArrayList<>();
 		if (getGlobal_infrasctructure().isPresent()) {
 			List<NeoloadInfra> loadInfraFromGlobalFile = getNeoLoadInfraFromGlobalFile(gitFolder);
@@ -243,13 +246,10 @@ public class NeoLoadTest {
 			return false;
 	}
 
-	public List<NeoloadInfra> getNeoLoadInfraFromGlobalFile(Path git) throws NeoLoadSerialException {
+	public List<NeoloadInfra> getNeoLoadInfraFromGlobalFile(Path git) throws NeoLoadSerialException, IOException {
 		if (getGlobal_infrasctructure().isPresent()) {
-			Yaml yaml = new Yaml(new Constructor(NeoLoadInfrastructureFile.class));
-			InputStream inputStream = this.getClass()
-					.getClassLoader()
-					.getResourceAsStream(git.toAbsolutePath() + "/" + NEOLOAD_FOLDER + "/" + this.getGlobal_infrasctructure().get());
-			NeoLoadInfrastructureFile neoLoadInfrastructureFile = yaml.load(inputStream);
+			final String yamlFile = Files.readAllLines(Paths.get(git.toAbsolutePath().toString(), NEOLOAD_FOLDER, this.getGlobal_infrasctructure().get())).stream().collect(Collectors.joining("\n"));
+			NeoLoadInfrastructureFile neoLoadInfrastructureFile	= new Yaml().loadAs(yamlFile, NeoLoadInfrastructureFile.class);
 
 			if (neoLoadInfrastructureFile != null) {
 				return neoLoadInfrastructureFile.getInfrastructures();

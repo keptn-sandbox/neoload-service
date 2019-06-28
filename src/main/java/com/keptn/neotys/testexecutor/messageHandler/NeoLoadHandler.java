@@ -77,6 +77,7 @@ public class NeoLoadHandler {
     			Path pp = Paths.get(sourcefolder);
     			Files.walk(pp)
     					.filter(path -> !Files.isDirectory(path))
+                        .filter(path -> !path.equals(Paths.get(sourcefolder,projectname+".zip")))
     					.forEach(path -> {
     						ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
     						try {
@@ -92,8 +93,7 @@ public class NeoLoadHandler {
     	}
 
     private void deletetempfolder() throws IOException {
-        Path path = Paths.get(gitfolder.toAbsolutePath()+"/tempneoload");
-        Files.delete(path);
+        boolean delete=deleteDirectory(new File(gitfolder.toAbsolutePath().toString()+TMP_NEOLOAD_FOLDER));
     }
 
     private String getAsCodeFiles(List<Project> projectPath)
@@ -105,7 +105,7 @@ public class NeoLoadHandler {
     }
 
     private String createZipFile(List<String> projectPath, String projectName, Optional<List<Constants>> constant_variables) throws IOException, NeoLoadJgitExeption {
-        Path path = Paths.get(gitfolder.toAbsolutePath()+"/tempneoload");
+        Path path = Paths.get(gitfolder.toAbsolutePath().toString()+TMP_NEOLOAD_FOLDER);
         if(!Files.exists(path))
             Files.createDirectory(path);
 
@@ -124,7 +124,7 @@ public class NeoLoadHandler {
         projectwithoutnlp.stream().forEach(file->
         {
             try {
-                FileUtils.copyFileToDirectory(new File(file),path.toFile());
+                FileUtils.copyFileToDirectory(new File(gitfolder.toAbsolutePath().toString()+file),path.toFile());
             } catch (IOException e) {
                 error.add(e);
             }
@@ -135,7 +135,7 @@ public class NeoLoadHandler {
                 return new NlConstants(constants);
             }).collect(Collectors.toList()));
             Yaml yaml = new Yaml();
-            tempfile=Optional.of(path.toAbsolutePath()+"/"+keptnEventFinished.getService()+"."+keptncontext+".yaml");
+            tempfile=Optional.of(path.toAbsolutePath().toString()+"/"+keptnEventFinished.getService()+"."+keptncontext+YAML_EXTENSION);
             FileWriter writer = new FileWriter(tempfile.get());
             yaml.dump(model, writer);
 
@@ -147,7 +147,7 @@ public class NeoLoadHandler {
             }).collect(Collectors.joining("\n")));
         }
 
-        return compressNLProject(path.toAbsolutePath().toString(),projectName);
+        return compressNLProject(path.toAbsolutePath().toString(),projectName+keptnEventFinished.getService());
 
     }
     private NeoLoadWebTest RunTest(File zipfile, NeoLoadTest test, Optional<String> nlapi, Optional<String> nlapitoken, Optional<String> nlurl, Optional<String> uploadurl, Optional<String> nlzoneid, int size) throws ApiException, NeoLoadJgitExeption {
@@ -168,7 +168,7 @@ public class NeoLoadHandler {
 
         ApiClient nlWebApiClient=new ApiClient();
         nlWebApiClient.setApiKey(nlapitoken.get());
-        nlWebApiClient.setBasePath(uploadurl.get());
+        nlWebApiClient.setBasePath(NLWEB_PROTOCOL+uploadurl.get()+NLWEB_APIVERSION);
 
         RuntimeApi runtimeApi=new RuntimeApi(nlWebApiClient);
         Calendar cal = Calendar.getInstance();
@@ -177,12 +177,12 @@ public class NeoLoadHandler {
         if(zipfile.exists())
         {
             ProjectDefinition projectDefinition = runtimeApi.postUploadProject(zipfile);
-            nlWebApiClient.setBasePath(nlapi.get());
+            nlWebApiClient.setBasePath(NLWEB_PROTOCOL+nlapi.get()+NLWEB_APIVERSION);
             nlWebApiClient.setApiKey(nlapitoken.get());
             runtimeApi=new RuntimeApi(nlWebApiClient);
 
             RunTestDefinition runTestDefinition = runtimeApi.getTestsRun(KEPTN_EVENT_URL+"_"+keptnEventFinished.getProject()+"_"+keptnEventFinished.getService()+"_"+test.getScenario(), projectDefinition.getProjectId(), test.getScenario(), test.getDescription(),getAsCodeFiles(test.getProject()),null,null,null,null,nlzoneid.get(),nlzoneid.get()+":"+String.valueOf(size));
-            NeoLoadWebTest neoLoadWebTest=new NeoLoadWebTest(runTestDefinition.getTestId(),nlurl.get() + "/#!trend/?scenario=" + test.getScenario() + "&limit=-1&project=" + projectDefinition.getProjectId(),nlurl.get() + "/#!result/" + runTestDefinition.getTestId() + "/overview");
+            NeoLoadWebTest neoLoadWebTest=new NeoLoadWebTest(runTestDefinition.getTestId(),NLWEB_PROTOCOL+nlurl.get() + "/#!trend/?scenario=" + test.getScenario() + "&limit=-1&project=" + projectDefinition.getProjectId(),NLWEB_PROTOCOL+nlurl.get() + "/#!result/" + runTestDefinition.getTestId() + "/overview");
 
 
             logger.info("Trending URL : " + neoLoadWebTest.getTrendingurl());

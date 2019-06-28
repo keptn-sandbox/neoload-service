@@ -13,7 +13,7 @@ public class NeoLoadConfiguration {
     public static String LOGING_LEVEL_KEY="logging-level";
     public static String NEOLOAD_CONFIG_FILE="keptn.neoload.engine.yaml";
     public static String NEOLOAD_FOLDER="tests/neoload";
-
+    public static String TMP_NEOLOAD_FOLDER="/tempneoload";
     public static String HEADER_KEPTNCONTEXT="shkeptncontext";
     public static String HEADER_datacontentype="datacontenttype";
 
@@ -28,6 +28,8 @@ public class NeoLoadConfiguration {
     public static final String SECRET_NL_ZONEID="NL_API_HOST";
     public static final String SECRET_NL_UPLOAD_HOST="NL_UPLOAD_HOST";
 
+    public static final String NLWEB_PROTOCOL="https://";
+    public static final String NLWEB_APIVERSION="/v1";
 
     public static final String TEST_STATUS_FAIL="FAILED";
 }

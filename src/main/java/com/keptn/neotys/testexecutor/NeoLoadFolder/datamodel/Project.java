@@ -33,7 +33,7 @@ public class Project {
     {
         File neoloadprojectFile = new File(pathinGit.toAbsolutePath()+"/"+path);
         Path full=neoloadprojectFile.toPath();
-        if(full.endsWith(YAML_EXTENSION)||full.endsWith(YML_EXTENSION)||full.endsWith(NLP_EXTENSION))
+        if(full.toAbsolutePath().toString().endsWith(YAML_EXTENSION)||full.toAbsolutePath().toString().endsWith(YML_EXTENSION)||full.toAbsolutePath().toString().endsWith(NLP_EXTENSION))
             return true;
         else
             return false;
