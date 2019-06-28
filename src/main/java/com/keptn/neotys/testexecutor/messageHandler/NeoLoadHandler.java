@@ -211,7 +211,19 @@ public class NeoLoadHandler {
     }
 
     private void deleteGitFolder() throws IOException {
-        Files.delete(gitfolder);
+        boolean delete=deleteDirectory(new File(gitfolder.toAbsolutePath().toString()));
+    }
+
+
+
+    boolean deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        return directoryToBeDeleted.delete();
     }
     private void runNLScenario(NeoLoadTest test)
     {
