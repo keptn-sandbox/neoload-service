@@ -2,7 +2,9 @@ package com.keptn.neotys.testexecutor.kubernetes;
 
 
 import com.keptn.neotys.testexecutor.log.KeptnLogger;
+import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 import static com.keptn.neotys.testexecutor.kubernetes.DockerConstants.*;
@@ -32,7 +35,7 @@ public class NeoLoadKubernetesClient {
     private String context;
     private KeptnLogger logger;
     private static final String DEFAULT_MASTER_URL="https://kubernetes.default.svc";
-
+    private static final String DEFAULT_API_SAAS="neoload-api.saas.neotys.com";
     public NeoLoadKubernetesClient(String masterurl,String kepncontext) {
         this.masterurl = masterurl;
         config = new ConfigBuilder().withMasterUrl(masterurl).build();
@@ -131,6 +134,9 @@ public class NeoLoadKubernetesClient {
                         .endMetadata()
                         .withNewSpec()
                         .addNewContainer()
+                        .withName(NEOLOAD+context)
+                        .withImagePullPolicy("IfNotPresent")
+                        .withPorts(controllerPort())
                         .withNewImage(NEOLAOD_CTL_DOCKER)
                         .withEnv(controllerEnv())
                         .endContainer()
@@ -144,14 +150,20 @@ public class NeoLoadKubernetesClient {
                     .addToLabels(NEOLOAD+"_"+CONTROLLER,NEOLOAD+context)
                     .endMetadata()
                     .withNewSpec()
-                    .addNewPort().withPort(7400).withNewTargetPort().withIntVal(7400).endTargetPort().endPort()
-                    .addNewPort().withPort(443).withNewTargetPort().withIntVal(443).endTargetPort().endPort()
-                    .addNewPort().withPort(7200).withNewTargetPort().withIntVal(7200).endTargetPort().endPort()
-                    .addNewPort().withPort(4569).withNewTargetPort().withIntVal(4569).endTargetPort().endPort()
+                    .addNewPort().withPort(7400).withName("nlapi").withProtocol("TCP").withNewTargetPort().withIntVal(7400).endTargetPort().endPort()
+                    .addNewPort().withPort(443).withName("nlssl").withProtocol("TCP").withNewTargetPort().withIntVal(443).endTargetPort().endPort()
+                    .addNewPort().withPort(7200).withName("nlmon").withProtocol("TCP").withNewTargetPort().withIntVal(7200).endTargetPort().endPort()
+                    .addNewPort().withPort(4569).withName("nlpoll").withProtocol("TCP").withNewTargetPort().withIntVal(4569).endTargetPort().endPort()
                     .addToSelector(NEOLOAD+"_"+CONTROLLER,NEOLOAD+context)
                     .withType(CLUSTER_IP)
                     .endSpec()
                     .done();
+
+            while(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+context).isReady())
+            {
+                logger.debug("deployController - : pods controller not ready ");
+                Thread.sleep(1000);
+            }
 
         }
         catch (Exception e)
@@ -165,17 +177,12 @@ public class NeoLoadKubernetesClient {
         {
             this.client = new DefaultKubernetesClient(config);
 
-            logger.debug("deleteLG - : delete Servvice with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+context+suffix );
-
-            client.services().inNamespace(KEPTN_EVENT_URL)
-                    .withName(NEOLOAD+context+suffix)
-                    .delete();
 
 
             logger.debug("deleteLG - : delete pods with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+context +suffix);
 
             client.pods().inNamespace(KEPTN_EVENT_URL)
-                    .withName(NEOLOAD+context+suffix)
+                    .withName(NEOLOAD+LGname+context+suffix)
                     .delete();
 
 
@@ -191,33 +198,36 @@ public class NeoLoadKubernetesClient {
         {
             this.client = new DefaultKubernetesClient(config);
 
-            logger.debug("deployLG - : deploying pod with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+context+suffix );
+            logger.debug("deployLG - : deploying pod with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+LGname+context+suffix );
 
             client.pods().inNamespace(KEPTN_EVENT_URL).createNew()
                     .withNewMetadata()
-                    .withName(NEOLOAD+context+suffix)
-                    .addToLabels(NEOLOAD+"_"+LG,NEOLOAD+context+suffix)
+                    .withName(NEOLOAD+LGname+context+suffix)
+                    .addToLabels(NEOLOAD+"_"+LG,NEOLOAD+LGname+context+suffix)
                     .endMetadata()
                     .withNewSpec()
                     .addNewContainer()
+                    .withName(NEOLOAD+LGname+context+suffix)
                     .withNewImage(NEOLAOD_LG_DOCKER)
-                    .withEnv(lgenv())
+                    .withEnv(lgenv(suffix))
+                    .withImagePullPolicy("IfNotPresent")
+                    .withPorts(lgPort())
                     .endContainer()
+                    .withHostname(NEOLOAD+LGname+context+suffix)
+                    .withHostNetwork(true)
+                    .withDnsPolicy("ClusterFirstWithHostNet")
                     .endSpec()
                     .done();
-            logger.debug("deployLG - : deploying service with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+context +suffix);
 
-            client.services().inNamespace(KEPTN_EVENT_URL).createNew()
-                    .withNewMetadata()
-                    .withName(NEOLOAD+context+suffix)
-                    .addToLabels(NEOLOAD+"_"+LG,NEOLOAD+context+suffix)
-                    .endMetadata()
-                    .withNewSpec()
-                     .addNewPort().withPort(7100).withNewTargetPort().withIntVal(7100).endTargetPort().endPort()
-                    .addToSelector(NEOLOAD+"_"+LG,NEOLOAD+context+suffix)
-                    .withType(CLUSTER_IP)
-                    .endSpec()
-                    .done();
+            while(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).isReady())
+            {
+                logger.debug("deployLG - : pod LG not ready :");
+                Thread.sleep(1000);
+            }
+
+            logger.debug(client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).get().getStatus().getPodIP());
+
+
 
         }
         catch (Exception e)
@@ -226,10 +236,52 @@ public class NeoLoadKubernetesClient {
         }
     }
 
-    public void deleteService(String servicename)
-    {
-        //----#TODO delete the LG Services or Controller
 
+
+    private List<ContainerPort> lgPort()
+    {
+        List<ContainerPort> containerPorts=new ArrayList<>();
+        ContainerPort port=new ContainerPort();
+        port.setContainerPort(7100);
+        port.setHostPort(7100);
+        port.setProtocol("TCP");
+        port.setName("nllg");
+        containerPorts.add(port);
+        return containerPorts;
+    }
+
+    private List<ContainerPort> controllerPort()
+    {
+        List<ContainerPort> containerPorts=new ArrayList<>();
+        ContainerPort port=new ContainerPort();
+        port.setContainerPort(7400);
+        port.setHostPort(7400);
+        port.setProtocol("TCP");
+        port.setName("nlapi");
+
+        containerPorts.add(port);
+        ContainerPort mon=new ContainerPort();
+        mon.setContainerPort(7200);
+        mon.setHostPort(7200);
+        mon.setProtocol("TCP");
+        mon.setName("nlmon");
+        containerPorts.add(mon);
+
+
+        ContainerPort ssl=new ContainerPort();
+        ssl.setContainerPort(443);
+        ssl.setHostPort(443);
+        ssl.setProtocol("TCP");
+        ssl.setName("nlssl");
+        containerPorts.add(ssl);
+
+        ContainerPort poll=new ContainerPort();
+        poll.setContainerPort(4569);
+        poll.setHostPort(4569);
+        poll.setProtocol("TCP");
+        poll.setName("nlpoll");
+        containerPorts.add(poll);
+        return containerPorts;
     }
 
     private List<EnvVar> controllerEnv()
@@ -239,33 +291,48 @@ public class NeoLoadKubernetesClient {
        createEnvList(list);
        list.add(new EnvVar(ENV_MODE,ENV_MANAGED,null));
        list.add(new EnvVar(ENV_LEASE_SERVER,LEASE_SERVER,null));
+
+      logger.debug("controllerenv : "+list.toString());
        return list;
 
     }
 
-    private List<EnvVar> lgenv()
+    private List<EnvVar> lgenv(String suffix)
     {
         List<EnvVar> list=new ArrayList<>();
 
         createEnvList(list);
         list.add(new EnvVar(ENV_MODE,ENV_MANAGED,null));
-        list.add(new EnvVar(ENV_LG_HOST,generateServiceName(LG),null));
-        list.add(new EnvVar(ENV_LG_PORT,LG_PORT,null));
+      //  list.add(new EnvVar(ENV_LG_HOST,generateServiceName(LGname,suffix),null));
+           EnvVar env=new EnvVarBuilder()
+                .withName(ENV_LG_HOST)
+                .withNewValueFrom()
+                .withNewFieldRef()
+                .withFieldPath("status.podIP")
+                .endFieldRef()
+                .endValueFrom()
+                .build();
+         list.add(env);
+         list.add(new EnvVar(ENV_LG_PORT,LG_PORT,null));
+
+        logger.debug("lgenv : "+list.toString());
+
         return list;
 
     }
 
-    private String generateServiceName(String type)
+    private String generateServiceName(String type,String suffix)
     {
-        return NEOLOAD+"-"+type+"-"+context+"."+KEPTN_EVENT_URL+".svc";
+        return NEOLOAD+type+context+suffix+"."+KEPTN_EVENT_URL+".svc.cluster.local";
     }
 
     private void createEnvList(final List<EnvVar> list )
     {
 
-        if(neoloadweb_url.isPresent())
-            list.add(new EnvVar(ENV_NEOLOADWEB_URL,neoloadweb_url.get(),null));
-
+        if(neoloadweb_apiurl.isPresent()) {
+            if(!neoloadweb_apiurl.get().equalsIgnoreCase(DEFAULT_API_SAAS))
+                list.add(new EnvVar(ENV_NEOLOADWEB_URL, "https://" + neoloadweb_apiurl.get() + "/v1", null));
+        }
         list.add(new EnvVar(ENV_NEOLOADWEB_TOKEN,neoloadAPitoken,null));
 
         if(neoloadZoneid.isPresent())

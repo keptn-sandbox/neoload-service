@@ -19,11 +19,11 @@ public  class KeptnLogger  {
     private String kepncontext;
     private Logger loger;
     private ConsoleHandler handler;
-    private static final String INFO="INFO";
-    private static final String WARN="WARN";
-    private static final String ERROR="ERROR";
-    private static final String TRACE="TRACE";
-    private static final String DEBUG="DEBUG";
+    public static final String INFO="INFO";
+    public static final String WARN="WARN";
+    public static final String ERROR="ERROR";
+    public static final String TRACE="TRACE";
+    public static final String DEBUG="DEBUG";
 
     String messageFormat="{\n" +
             "  \"keptnContext\": \"%s\",\n" +
@@ -94,7 +94,8 @@ public  class KeptnLogger  {
       loger.log(Level.SEVERE,s);
     }
     public void error(String s,Throwable throwable) {
-        loger.log(Level.SEVERE,s,throwable);
+        loger.log(Level.SEVERE,s +" exception : "+ throwable.getMessage(),throwable);
+        throwable.printStackTrace();
     }
 
     public void info(String s) {
@@ -104,8 +105,6 @@ public  class KeptnLogger  {
     public void warn(String s) {
         loger.log(Level.WARNING,s);
     }
-
-
 
 
     public void debug(String s) {

@@ -11,6 +11,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<tag>0.1</tag>
 		<dockerimage>registry.hub.docker.com/hrexed/keptn_neoload</dockerimage>
 		<NL_WEB_HOST>neoload.saas.com</NL_WEB_HOST>
 		<NL_API_HOST>neoload-api.saas.com</NL_API_HOST>
@@ -91,7 +92,12 @@
 				<configuration>
 					<to>
 						<image>${dockerimage}</image>
+						<tags>
+							<tag>${tag}</tag>
+							<tag>latest</tag>
+						</tags>
 					</to>
+					<allowInsecureRegistries>true</allowInsecureRegistries>
 					<container>
 						<ports>
 							<port>${port}</port>

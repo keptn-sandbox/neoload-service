@@ -7,7 +7,7 @@ import java.util.Objects;
 public class KeptnExtensions implements Extension {
 
     private String shkeptncontext;
-    private String datacontenttype;
+    private String contenttype;
 
     //Mandatory to let cloud-events lib instatiate class
     public KeptnExtensions() {
@@ -15,7 +15,7 @@ public class KeptnExtensions implements Extension {
 
     public KeptnExtensions(final String shkeptncontext, final String datacontenttype) {
         this.shkeptncontext = shkeptncontext;
-        this.datacontenttype = datacontenttype;
+        this.contenttype = datacontenttype;
     }
     public String getShkeptncontext() {
         return shkeptncontext;
@@ -26,11 +26,11 @@ public class KeptnExtensions implements Extension {
     }
 
     public String getDatacontenttype() {
-        return datacontenttype;
+        return contenttype;
     }
 
     public void setDatacontenttype(String datacontenttype) {
-        this.datacontenttype = datacontenttype;
+        this.contenttype = datacontenttype;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class KeptnExtensions implements Extension {
     public String toString() {
         return "KeptExtension{" +
                 "shkeptncontext='" + shkeptncontext + '\'' +
-                ", datacontenttype='" + datacontenttype + '\'' +
+                ", datacontenttype='" + contenttype + '\'' +
                 '}';
     }
 }

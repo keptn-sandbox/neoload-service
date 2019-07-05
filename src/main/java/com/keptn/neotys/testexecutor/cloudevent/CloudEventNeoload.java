@@ -11,6 +11,7 @@ import io.vertx.reactivex.ext.healthchecks.HealthCheckHandler;
 import io.vertx.reactivex.ext.web.Router;
 
 
+import java.io.EOFException;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -25,7 +26,7 @@ public class CloudEventNeoload extends AbstractVerticle {
 	private  Vertx rxvertx;
 
 	public void start() {
-		rxvertx=io.vertx.reactivex.core.Vertx.newInstance(this.getVertx());
+		rxvertx= Vertx.newInstance(this.getVertx());
 		loger=new KeptnLogger(this.getClass().getName());
 		if(rxvertx ==null)
 			System.out.println("Issues during init");
@@ -78,9 +79,39 @@ public class CloudEventNeoload extends AbstractVerticle {
 														String keptncontext = keptnExtensions.getShkeptncontext();
 														loger.setKepncontext(keptncontext);
 														loger.debug("Received data " + eventFinished.toString());
-														NeoLoadHandler neoLoadHandler = new NeoLoadHandler(eventFinished, keptnExtensions, receivedEvent.getId());
-														neoLoadHandler.runNeoLoadTest();
-														req.response().setStatusCode(200).end("test has finished");
+														KeptnExtensions finalKeptnExtensions = keptnExtensions;
+														req.response().setStatusCode(200).putHeader("content-type", "text/plain").end("event received");
+
+														vertx.<String>executeBlocking(
+																future -> {
+																	String result;
+																	try {
+																		NeoLoadHandler neoLoadHandler = new NeoLoadHandler(eventFinished, finalKeptnExtensions, receivedEvent.getId());
+
+
+																		neoLoadHandler.runNeoLoadTest(rxvertx,receivedEvent);
+																		result="test has finished";
+																		future.complete(result);
+																	}
+																	catch (Exception e)
+																	{
+																		result="Exception :"+e.getMessage();
+																		future.fail(result);
+																	}
+																},res->
+																{
+																	if (res.succeeded()) {
+
+																		//req.response().setStatusCode(200).putHeader("content-type", "text/plain").end(res.result());
+
+																	} else {
+																		res.cause().printStackTrace();
+																	}
+																}
+
+														);
+
+
 													}
 													else
 													{

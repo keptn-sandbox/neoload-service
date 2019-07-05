@@ -15,6 +15,8 @@ import com.neotys.ascode.swagger.client.ApiException;
 import com.neotys.ascode.swagger.client.api.RuntimeApi;
 import com.neotys.ascode.swagger.client.model.ProjectDefinition;
 import com.neotys.ascode.swagger.client.model.RunTestDefinition;
+import io.cloudevents.CloudEvent;
+import io.vertx.reactivex.core.Vertx;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -211,7 +213,11 @@ public class NeoLoadHandler {
     }
 
     private void deleteGitFolder() throws IOException {
+        logger.debug("deleteGitFolder - delete gitfolder "+gitfolder.toAbsolutePath().toString());
         boolean delete=deleteDirectory(new File(gitfolder.toAbsolutePath().toString()));
+        if(delete)
+            logger.info("deleteGitFolder - deleted gitfolder "+gitfolder.toAbsolutePath().toString());
+
     }
 
 
@@ -225,7 +231,7 @@ public class NeoLoadHandler {
         }
         return directoryToBeDeleted.delete();
     }
-    private void runNLScenario(NeoLoadTest test)
+    private void runNLScenario(NeoLoadTest test, Vertx rxvertx, CloudEvent<Object> receivedEvent)
     {
         final NeoLoadKubernetesClient neoLoadKubernetesClient=new NeoLoadKubernetesClient(keptncontext);
         List<String> machinelist = null;
@@ -242,15 +248,18 @@ public class NeoLoadHandler {
                 });
 
 
+
                 List<String> projectspath=test.getProject().stream().map(project -> project.getPath()).collect(Collectors.toList());
                 String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject(),Optional.ofNullable(test.getConstant_variables()));
+
+                Thread.sleep(20000);
 
                 NeoLoadWebTest loadWebTest=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),neoLoadKubernetesClient.getNeoloadZoneid(),machinelist.size());
                 keptnEventFinished.setTestid(loadWebTest.getTestid());
                 keptnEventFinished.setNeoloadURL(loadWebTest.getTesturl());
                 ///---
-                NeoLoadEndEvent endEvent=new NeoLoadEndEvent(logger,eventid);
-                endEvent.endevent(keptnEventFinished,extensions);
+                NeoLoadEndEvent endEvent=new NeoLoadEndEvent(logger,eventid,rxvertx);
+                endEvent.endevent(keptnEventFinished,extensions,receivedEvent);
                 //--send end event-------------
 
             }
@@ -264,18 +273,24 @@ public class NeoLoadHandler {
             logger.error("runNLScenario exepption ",e);
         } catch (IOException e) {
             logger.error("runNLScenario exepption ",e);
-        } catch (ApiException e) {
+        } catch (ApiException | InterruptedException e) {
             logger.error("RUnNLScenario , api exception",e);
         } finally {
             if(neoLoadKubernetesClient!=null)
             {
-                //delete infra
-                if(machinelist!=null) {
-                    machinelist.stream().forEach(machine->{
-                        neoLoadKubernetesClient.deleteLG(machine);
-                    });
+                try {
+                    //delete infra
+                    if (machinelist != null) {
+                        machinelist.stream().forEach(machine -> {
+                            neoLoadKubernetesClient.deleteLG(machine);
+                        });
+                    }
+                    neoLoadKubernetesClient.deleteController();
                 }
-                neoLoadKubernetesClient.deleteController();
+                catch (Exception e)
+                {
+                    logger.error("Unable to delete services ",e);
+                }
             }
             try {
                 deletetempfolder();
@@ -285,14 +300,16 @@ public class NeoLoadHandler {
         }
     }
 
-    public void runNeoLoadTest() throws NeoLoadJgitExeption, NeoLoadSerialException, IOException {
+    public void runNeoLoadTest(Vertx rxvertx, CloudEvent<Object> receivedEvent) throws NeoLoadJgitExeption, NeoLoadSerialException, IOException {
        // gitfolder = getNeoLoadTestFolder();
         List<NeoLoadTestStep> neoLoadTestStepList=getNeoLoadTest();
 
 
         //---for each test start test -----
         neoLoadTestStepList.stream().filter(neoLoadTestStep -> neoLoadTestStep.getStep().getStage().equalsIgnoreCase(this.stage)).forEach(step->{
-            runNLScenario(step.getStep());
+            logger.debug("Running step : "+step.getStep().getScenario());
+            runNLScenario(step.getStep(),rxvertx,receivedEvent);
+            logger.debug("end step : "+step.getStep().getScenario());
 
         });
 

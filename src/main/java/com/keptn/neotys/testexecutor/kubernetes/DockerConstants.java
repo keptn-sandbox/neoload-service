@@ -4,9 +4,10 @@ public class DockerConstants {
 
     public static final String CONTROLLER="controller";
     public static final String LG="LG";
+    public static final String LGname="lg";
     public static final String NEOLOAD="neoload";
-    public static final String NEOLAOD_LG_DOCKER="neotys/neoload-loadgenerator:latest";
-    public static final String NEOLAOD_CTL_DOCKER="neotys/neoload-controller:latest";
+    public static final String NEOLAOD_LG_DOCKER="neotys/neoload-loadgenerator:6.10";
+    public static final String NEOLAOD_CTL_DOCKER="neotys/neoload-controller:6.10";
     public static final String ENV_NEOLOADWEB_URL="NEOLOADWEB_URL";
     public static final String ENV_NEOLOADWEB_TOKEN="NEOLOADWEB_TOKEN";
     public static final String ENV_MODE="MODE";
