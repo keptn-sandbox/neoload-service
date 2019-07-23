@@ -1,6 +1,9 @@
 package com.keptn.neotys.testexecutor.kubernetes;
 
 
+import com.github.rholder.retry.*;
+import com.google.common.base.Predicates;
+import com.keptn.neotys.testexecutor.exception.NeoLoadJgitExeption;
 import com.keptn.neotys.testexecutor.log.KeptnLogger;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.EnvVar;
@@ -15,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
@@ -159,11 +164,40 @@ public class NeoLoadKubernetesClient {
                     .endSpec()
                     .done();
 
-            while(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+context).isReady())
+
+            Callable<Boolean> callable = new Callable<Boolean>() {
+                public Boolean call() throws Exception {
+                    if(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+context).isReady())
+                    {
+                        logger.debug("deployController - : pod controller not ready :");
+                        // do something useful here
+                        return true;
+                    }
+                    else
+                        return false;
+
+                }
+            };
+            Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+                    .retryIfResult(Predicates.<Boolean>equalTo(false))
+                    .retryIfRuntimeException()
+                    .withWaitStrategy(WaitStrategies.exponentialWait(100, 5, TimeUnit.SECONDS))
+                    .withStopStrategy(StopStrategies.stopAfterDelay(5, TimeUnit.MINUTES))
+                    .build();
+            try {
+                retryer.call(callable);
+            } catch (RetryException e) {
+                logger.error("deployController error ",e);
+                throw new NeoLoadJgitExeption("Unable to get the pod controller ready");
+            } catch (ExecutionException e) {
+                logger.error("deployController error ",e);
+                throw new NeoLoadJgitExeption("Unable to get the pod controller ready");
+            }
+            /*while(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+context).isReady())
             {
                 logger.debug("deployController - : pods controller not ready ");
                 Thread.sleep(1000);
-            }
+            }*/
 
         }
         catch (Exception e)
@@ -219,15 +253,46 @@ public class NeoLoadKubernetesClient {
                     .endSpec()
                     .done();
 
-            while(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).isReady())
+
+
+           /* while(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).isReady())
             {
                 logger.debug("deployLG - : pod LG not ready :");
                 Thread.sleep(1000);
-            }
+            }*/
 
             logger.debug(client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).get().getStatus().getPodIP());
 
 
+            Callable<Boolean> callable = new Callable<Boolean>() {
+                public Boolean call() throws Exception {
+                    if(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).isReady())
+                    {
+                        logger.debug("deployLG - : pod LG not ready :");
+                        // do something useful here
+                        return true;
+                    }
+                    else
+                        return false;
+
+                }
+            };
+
+            Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+                    .retryIfResult(Predicates.<Boolean>equalTo(false))
+                    .retryIfRuntimeException()
+                    .withWaitStrategy(WaitStrategies.exponentialWait(100, 5, TimeUnit.SECONDS))
+                    .withStopStrategy(StopStrategies.stopAfterDelay(5, TimeUnit.MINUTES))
+                    .build();
+            try {
+                retryer.call(callable);
+            } catch (RetryException e) {
+                logger.error("deployLG error ",e);
+                throw new NeoLoadJgitExeption("Unable to get the pods ready");
+            } catch (ExecutionException e) {
+                logger.error("deployLG error ",e);
+                throw new NeoLoadJgitExeption("Unable to get the pods ready");
+            }
 
         }
         catch (Exception e)
