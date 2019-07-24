@@ -22,6 +22,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -339,6 +341,8 @@ public class NeoLoadHandler {
         else throw  new NeoLoadJgitExeption("no git folder define ");
 
             }
+
+
     private Path getNeoLoadTestFolder()
     {
         try {
@@ -353,6 +357,8 @@ public class NeoLoadHandler {
                         .setDirectory(localPath.toFile())
                         //.setBranch(keptnEventFinished.getStage())
                         .call();
+
+
 
                 logger.debug("getNeoLoadTestFolder - end clonning repo  "+getGitHubFolder());
 

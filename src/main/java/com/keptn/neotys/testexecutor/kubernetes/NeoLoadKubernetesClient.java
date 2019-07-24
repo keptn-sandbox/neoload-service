@@ -181,7 +181,7 @@ public class NeoLoadKubernetesClient {
             Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                     .retryIfResult(Predicates.<Boolean>equalTo(false))
                     .retryIfRuntimeException()
-                    .withWaitStrategy(WaitStrategies.exponentialWait(100, 5, TimeUnit.SECONDS))
+                    .withWaitStrategy(WaitStrategies.fixedWait( 1, TimeUnit.SECONDS))
                     .withStopStrategy(StopStrategies.stopAfterDelay(5, TimeUnit.MINUTES))
                     .build();
             try {
@@ -281,7 +281,7 @@ public class NeoLoadKubernetesClient {
             Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                     .retryIfResult(Predicates.<Boolean>equalTo(false))
                     .retryIfRuntimeException()
-                    .withWaitStrategy(WaitStrategies.exponentialWait(100, 5, TimeUnit.SECONDS))
+                    .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS))
                     .withStopStrategy(StopStrategies.stopAfterDelay(5, TimeUnit.MINUTES))
                     .build();
             try {
