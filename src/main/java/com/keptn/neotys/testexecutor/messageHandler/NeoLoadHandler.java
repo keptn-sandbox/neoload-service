@@ -245,11 +245,19 @@ public class NeoLoadHandler {
 
                 neoLoadKubernetesClient.deployController();
 
+                List<String> error=new ArrayList<>();
                 machinelist.stream().forEach(machine->{
-                    neoLoadKubernetesClient.deployLG(machine);
+                    try {
+                        neoLoadKubernetesClient.deployLG(machine);
+                    } catch (NeoLoadJgitExeption neoLoadJgitExeption) {
+                        logger.error("deployment issue ",neoLoadJgitExeption);
+                        error.add(neoLoadJgitExeption.getMessage());
+
+                    }
                 });
 
-
+                if(error.size()>0)
+                    throw new NeoLoadJgitExeption("Issue while deploying LGs");
 
                 List<String> projectspath=test.getProject().stream().map(project -> project.getPath()).collect(Collectors.toList());
                 String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject(),Optional.ofNullable(test.getConstant_variables()));

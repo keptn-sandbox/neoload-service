@@ -125,8 +125,7 @@ public class NeoLoadKubernetesClient {
             logger.error("deleteController error ",e);
         }
     }
-    public void deployController()
-    {
+    public void deployController() throws NeoLoadJgitExeption {
         try
         {
             this.client = new DefaultKubernetesClient(config);
@@ -200,10 +199,16 @@ public class NeoLoadKubernetesClient {
             }*/
 
         }
+        catch (NeoLoadJgitExeption e)
+        {
+            logger.error("deployController error ",e);
+            throw new NeoLoadJgitExeption("Unable to get the pod controller ready");
+        }
         catch (Exception e)
         {
             logger.error("deployController error ",e);
         }
+
     }
     public void deleteLG(String suffix)
     {
@@ -226,8 +231,7 @@ public class NeoLoadKubernetesClient {
             logger.error("deleteLG error ",e);
         }
     }
-    public void deployLG(String suffix)
-    {
+    public void deployLG(String suffix) throws NeoLoadJgitExeption {
         try
         {
             this.client = new DefaultKubernetesClient(config);
@@ -295,6 +299,11 @@ public class NeoLoadKubernetesClient {
                 throw new NeoLoadJgitExeption("Unable to get the pods ready");
             }
 
+        }
+        catch (NeoLoadJgitExeption e)
+        {
+            logger.error("deployLG error ",e);
+            throw new NeoLoadJgitExeption("Unable to get the pod controller ready");
         }
         catch (Exception e)
         {
