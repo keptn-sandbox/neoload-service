@@ -99,7 +99,10 @@
 				   </from>
 					<to>
 						<image>${dockerimage}</image>
-
+						<auth>
+							<username>hrexed</username>
+							<password>elRE1979</password>
+						</auth>
 						<tags>
 							<tag>${tag}</tag>
 							<tag>latest</tag>
