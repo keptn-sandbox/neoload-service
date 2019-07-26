@@ -261,7 +261,6 @@ public class NeoLoadKubernetesClient {
                 Thread.sleep(1000);
             }*/
 
-            logger.debug(client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).get().getStatus().getPodIP());
 
 
             Callable<Boolean> callable = new Callable<Boolean>() {
@@ -286,6 +285,8 @@ public class NeoLoadKubernetesClient {
                     .build();
             try {
                 retryer.call(callable);
+                logger.debug(client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).get().getStatus().getPodIP());
+
             } catch (RetryException e) {
                 logger.error("deployLG error ",e);
                 throw new NeoLoadJgitExeption("Unable to get the pods ready");
