@@ -14,5 +14,5 @@ NL_SERVICE_RELEASE="0.0.5"
 
 print_info "Deploying neoload-service $NL_SERVICE_RELEASE"
 # to update the link
-kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/neoload-service-manifest.yml
+kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/neoload-service/0.4.0/config/neoloadexecutor/neoload-service-manifest.yml
 verify_kubectl $? "Deploying neoload-service failed."
