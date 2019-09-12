@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neoload-service
+  namespace: keptn
+spec:
+  selector:
+    matchLabels:
+      run: neoload-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: neoload-service
+    spec:
+      containers:
+      - name: neoload-service
+        image: hrexed/keptn_neoload:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 15
+        env:
+        - name: logging-level
+          value: DEBUG
+        - name: NL_WEB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: neoload
+              key: NL_WEB_HOST
+        - name: NL_API_HOST
+          valueFrom:
+            secretKeyRef:
+              name: neoload
+              key: NL_API_HOST
+        - name: NL_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: neoload
+              key: NL_API_TOKEN
+        - name: NL_WEB_ZONEID
+          valueFrom:
+            secretKeyRef:
+              name: neoload
+              key: NL_WEB_ZONEID
+        - name: NL_UPLOAD_HOST
+          valueFrom:
+            secretKeyRef:
+              name: neoload
+              key: NL_UPLOAD_HOST
+        - name: PUBSUB_URL
+          value: 'nats://keptn-nats-cluster'
+        - name: PUBSUB_TOPIC
+          value: 'sh.keptn.events.deployment-finished'
+        - name: PUBSUB_RECIPIENT
+          value: 'neoload-service'
