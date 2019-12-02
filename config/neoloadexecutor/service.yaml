@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neoload-service
+  namespace: keptn
+spec:
+  selector:
+    matchLabels:
+      run: neoload-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: neoload-service
+    spec:
+      containers:
+        - name: neoload-service
+          image: hrexed/keptn_neoload:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: logging-level
+              value: DEBUG
+            - name: NL_WEB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: neoload
+                  key: NL_WEB_HOST
+            - name: NL_API_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: neoload
+                  key: NL_API_HOST
+            - name: NL_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: neoload
+                  key: NL_API_TOKEN
+            - name: NL_WEB_ZONEID
+              valueFrom:
+                secretKeyRef:
+                  name: neoload
+                  key: NL_WEB_ZONEID
+            - name: NL_UPLOAD_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: neoload
+                  key: NL_UPLOAD_HOST
+            imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neoload-service
+  namespace: keptn
+  labels:
+    run: neoload-service
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+  selector:
+    run: neoload-service
