@@ -10,9 +10,10 @@ kubectl -n keptn create secret generic neoload --from-literal="NL_WEB_HOST=$NL_W
 verify_kubectl $? "Creating neoload secret for keptn services failed."
 
 # Create dynatrace-service
-NL_SERVICE_RELEASE="0.0.5"
+NL_SERVICE_RELEASE="0.0.6"
 
 print_info "Deploying neoload-service $NL_SERVICE_RELEASE"
 # to update the link
-kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/k8s-neoload-service-manifes.yml
+kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/service.yaml
+kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/distributor.yaml
 verify_kubectl $? "Deploying neoload-service failed."
