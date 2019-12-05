@@ -10,6 +10,8 @@ import com.keptn.neotys.testexecutor.exception.NeoLoadJgitExeption;
 import com.keptn.neotys.testexecutor.exception.NeoLoadSerialException;
 import com.keptn.neotys.testexecutor.kubernetes.NeoLoadKubernetesClient;
 import com.keptn.neotys.testexecutor.log.KeptnLogger;
+import com.keptn.neotys.testexecutor.ressource.ConfigurationApi;
+import com.keptn.neotys.testexecutor.ressource.KeptnRessource;
 import com.neotys.ascode.swagger.client.ApiClient;
 import com.neotys.ascode.swagger.client.ApiException;
 import com.neotys.ascode.swagger.client.api.RuntimeApi;
@@ -22,8 +24,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -51,18 +51,51 @@ public class NeoLoadHandler {
     private String eventid;
     private String stage;
     private Optional<String> tempfile;
+    private List<NeoLoadTestStep> neoLoadTestStepList;
 
-    public NeoLoadHandler(KeptnEventFinished keptnEventFinishedCloudEvent, KeptnExtensions extensions, String eventid) throws IOException, NeoLoadJgitExeption {
+    public NeoLoadHandler(Vertx rxvertx, KeptnEventFinished keptnEventFinishedCloudEvent, KeptnExtensions extensions, String eventid) throws IOException, NeoLoadJgitExeption, NeoLoadSerialException {
         this.keptnEventFinished=keptnEventFinishedCloudEvent;
         logger = new KeptnLogger(this.getClass().getName());
         logger.setKepncontext(extensions.getShkeptncontext());
         keptncontext=extensions.getShkeptncontext();
         eventid=eventid;
-        gitfolder= getNeoLoadTestFolder();
+        neoLoadTestStepList=getRessources(rxvertx);
         this.stage=keptnEventFinished.getStage();
         tempfile=Optional.empty();
+
+
     }
 
+    private List<NeoLoadTestStep> getRessources(Vertx vertx) throws NeoLoadSerialException, NeoLoadJgitExeption {
+        ConfigurationApi configurationApi=new ConfigurationApi(logger,vertx,keptnEventFinished.getProject(),keptnEventFinished.getStage());
+        KeptnRessource keptnRessource=configurationApi.getRessource(NEOLOAD_CONFIG_FILE);
+
+        if(keptnRessource!=null)
+        {
+            String yaml = keptnRessource.getDecodedRessourceContent();
+            NeoLoadDataModel neoLoadDataModel = new Yaml().loadAs(yaml, NeoLoadDataModel.class);
+            if(neoLoadDataModel==null) {
+                logger.debug("getNeoLoadTest - no able to deserialize the yaml file");
+                throw new NeoLoadSerialException("Unable to deserialize YAML file ");
+            }
+            if(neoLoadDataModel.getSteps().size()<0)
+            {
+                logger.debug("getNeoLoadTest - there is no testing steps");
+                throw new NeoLoadJgitExeption("There is no testing steps define ");
+            }
+
+            final ArrayList<NeoLoadTestStep> neoLoadTestSteps = new ArrayList<>();
+
+
+            return neoLoadDataModel.getSteps();
+        }
+        else
+        {
+            logger.error("No Ressrouce "+ NEOLOAD_CONFIG_FILE +" found for project "+ keptnEventFinished.getProject() + " and stage "+ keptnEventFinished.getStage());
+            throw new NeoLoadJgitExeption("No Ressrouce "+ NEOLOAD_CONFIG_FILE +" found for project "+ keptnEventFinished.getProject() + " and stage "+ keptnEventFinished.getStage());
+
+        }
+    }
     private  String compressNLProject(String sourcefolder,String projectname) throws IOException {
     		String nameofZipfile=new File(sourcefolder).getParentFile().getName();
     		String nameofZipfolder=new File(sourcefolder).getParentFile().getParentFile().toString();
@@ -312,63 +345,57 @@ public class NeoLoadHandler {
 
     public void runNeoLoadTest(Vertx rxvertx, CloudEvent<Object> receivedEvent) throws NeoLoadJgitExeption, NeoLoadSerialException, IOException {
        // gitfolder = getNeoLoadTestFolder();
-        List<NeoLoadTestStep> neoLoadTestStepList=getNeoLoadTest();
+
+        StringBuilder error=new StringBuilder();
+
 
 
         //---for each test start test -----
-        neoLoadTestStepList.stream().filter(neoLoadTestStep -> neoLoadTestStep.getStep().getStage().equalsIgnoreCase(this.stage)).forEach(step->{
+        neoLoadTestStepList.stream().forEach(step->{
+            logger.debug("Clonning repo :"+step.getStep().getRepository());
+
+            try {
+                gitfolder=getNeoLoadTestFolder(getGitHubFolder(step.getStep().getRepository()));
+            } catch (IOException e) {
+                error.append("Technical Error while retrieveing repository "+e.getMessage());
+            } catch (NeoLoadJgitExeption neoLoadJgitExeption) {
+                error.append("Technical Error while retrieveing repository "+neoLoadJgitExeption.getMessage());
+            }
             logger.debug("Running step : "+step.getStep().getScenario());
             runNLScenario(step.getStep(),rxvertx,receivedEvent);
             logger.debug("end step : "+step.getStep().getScenario());
-
+            try {
+                deleteGitFolder();
+            } catch (IOException e) {
+                error.append("Technical Error while deleting temporary repository "+e.getMessage());
+            }
         });
 
-        deleteGitFolder();
+
     }
-    private List<NeoLoadTestStep> getNeoLoadTest() throws NeoLoadJgitExeption, NeoLoadSerialException, IOException {
-        if(gitfolder!=null)
-        {
-            logger.debug("getNeoLoadTest - loading yaml file "+gitfolder.toAbsolutePath()+"/"+NEOLOAD_FOLDER+"/"+NEOLOAD_CONFIG_FILE);
-
-	        final String yamlFile = Files.readAllLines(Paths.get(gitfolder.toAbsolutePath().toString(), NEOLOAD_FOLDER, NEOLOAD_CONFIG_FILE)).stream().collect(Collectors.joining("\n"));
-	        NeoLoadDataModel neoLoadDataModel = new Yaml().loadAs(yamlFile, NeoLoadDataModel.class);
-            if(neoLoadDataModel==null) {
-                logger.debug("getNeoLoadTest - no able to deserialize the yaml file");
-                throw new NeoLoadSerialException("Unable to deserialize YAML file ");
-            }
-            if(neoLoadDataModel.getSteps().size()<0)
-            {
-                logger.debug("getNeoLoadTest - there is no testing steps");
-                throw new NeoLoadJgitExeption("There is no testing steps define ");
-            }
-
-	        final ArrayList<NeoLoadTestStep> neoLoadTestSteps = new ArrayList<>();
-	        return neoLoadDataModel.getSteps();
-
-        }
-        else throw  new NeoLoadJgitExeption("no git folder define ");
-
-            }
 
 
-    private Path getNeoLoadTestFolder()
+
+    private Path getNeoLoadTestFolder(String ressource)
     {
         try {
+
+
             Path localPath = Files.createTempDirectory("Gitfolder_" + keptncontext);
             logger.debug("getNeoLoadTestFolder - local directory created "+localPath);
 
             if(keptnEventFinished!=null) {
-                logger.debug("getNeoLoadTestFolder - start clonning repo  "+getGitHubFolder());
+                logger.debug("getNeoLoadTestFolder - start clonning repo  "+getGitHubFolder(ressource));
 
                 Git result = Git.cloneRepository()
-                        .setURI(getGitHubFolder())
+                        .setURI(getGitHubFolder(ressource))
                         .setDirectory(localPath.toFile())
-                        //.setBranch(keptnEventFinished.getStage())
+                        //.setBranch(keptnEventFinished.getRepository())
                         .call();
 
 
 
-                logger.debug("getNeoLoadTestFolder - end clonning repo  "+getGitHubFolder());
+                logger.debug("getNeoLoadTestFolder - end clonning repo  "+getGitHubFolder(ressource));
 
                 if(!hasNeoLoadFolder(localPath)) {
                     logger.debug("No " + NEOLOAD_FOLDER + "is not available in +" + localPath.toAbsolutePath());
@@ -376,11 +403,7 @@ public class NeoLoadHandler {
                     throw new NeoLoadJgitExeption("No " + NEOLOAD_FOLDER + "is not available in +" + localPath.toAbsolutePath());
                 }
 
-                 if(!hasNeoLoadKeptn(localPath)) {
-                     logger.debug("No " + localPath.toAbsolutePath() + "/" + NEOLOAD_FOLDER + "/" + NEOLOAD_CONFIG_FILE + "is not available in +" + localPath.toAbsolutePath());
 
-                     throw new NeoLoadJgitExeption("No " + localPath.toAbsolutePath() + "/" + NEOLOAD_FOLDER + "/" + NEOLOAD_CONFIG_FILE + "is not available in +" + localPath.toAbsolutePath());
-                 }
 
                 // Note: the call() returns an opened repository already which needs to be closed to avoid file handle leaks!
                 logger.info("Having repository: " + result.getRepository().getDirectory());
@@ -423,11 +446,14 @@ public class NeoLoadHandler {
             return false;
     }
 
-    private String getGitHubFolder() throws IOException, NeoLoadJgitExeption {
+    private String getGitHubFolder(String repository) throws IOException, NeoLoadJgitExeption {
         String gitFolder;
 
         if (keptnEventFinished !=null) {
-            gitFolder = GITHUB + keptnEventFinished.getGithuborg() + "/" + keptnEventFinished.getService() +".git";
+            if(repository.endsWith(".git"))
+                gitFolder=repository;
+            else
+                gitFolder =repository +".git";
             return gitFolder;
 
         } else {

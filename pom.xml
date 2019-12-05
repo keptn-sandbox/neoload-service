@@ -11,7 +11,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<tag>0.1</tag>
+		<tag>0.6.0</tag>
 		<dockerimage>registry.hub.docker.com/hrexed/keptn_neoload</dockerimage>
 		<NL_WEB_HOST>neoload.saas.com</NL_WEB_HOST>
 		<NL_API_HOST>neoload-api.saas.com</NL_API_HOST>

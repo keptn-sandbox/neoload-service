@@ -6,12 +6,10 @@ import com.keptn.neotys.testexecutor.NeoLoadFolder.NeoloadInfrastructureModel.Ne
 import com.keptn.neotys.testexecutor.exception.NeoLoadJgitExeption;
 import com.keptn.neotys.testexecutor.exception.NeoLoadSerialException;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 
 public class NeoLoadTest {
-	String stage;
+	String repository;
 	List<Project> project;
 	String description;
 	String scenario;
@@ -36,8 +34,8 @@ public class NeoLoadTest {
 		constant_variables = new ArrayList<>();
 	}
 
-	public NeoLoadTest(String stage, List<Project> project, String description, String scenario, @Nullable Infrastructure infrastructure, @Nullable String global_infrasctructure, @Nullable List<Constants> constant_variables) {
-		this.stage = stage;
+	public NeoLoadTest(String repository, List<Project> project, String description, String scenario, @Nullable Infrastructure infrastructure, @Nullable String global_infrasctructure, @Nullable List<Constants> constant_variables) {
+		this.repository = repository;
 		this.project = project;
 		this.description = description;
 		this.scenario = scenario;
@@ -46,12 +44,12 @@ public class NeoLoadTest {
 		this.constant_variables = constant_variables;
 	}
 
-	public String getStage() {
-		return stage;
+	public String getRepository() {
+		return repository;
 	}
 
-	public void setStage(String stage) {
-		this.stage = stage;
+	public void setRepository(String repository) {
+		this.repository = repository;
 	}
 
 //	public Optional<List<Constants>> getConstant_variables() {
@@ -263,7 +261,7 @@ public class NeoLoadTest {
 	@Override
 	public String toString() {
 		return "NeoLoadTest{" +
-				"stage='" + stage + '\'' +
+				"repository='" + repository + '\'' +
 				", project=" + project +
 				", description='" + description + '\'' +
 				", scenario='" + scenario + '\'' +

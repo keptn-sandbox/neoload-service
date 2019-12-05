@@ -38,7 +38,7 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
 ```yaml
 steps:
 - step:
-    stage: dev
+    repository: dev
     project:
     - path: /tests/neoload/catalogue_neoload.yaml
     description: BasicCheck

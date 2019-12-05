@@ -7,7 +7,7 @@ import java.util.List;
 //  :
 //       - step :
 //          - test :
-//             - stage : dev
+//             - repository : path
 //             - project :
 //                 - path  : absolute path to the project folder
 //                 - path :

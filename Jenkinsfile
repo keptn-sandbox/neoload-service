@@ -12,20 +12,20 @@ pipeline {
   }
 
   stages {
-      stage('Checkout') {
+      repository('Checkout') {
           agent { label 'master' }
           steps {
                git  url:"https://github.com/${GROUP}/${APP_NAME}.git",
                       branch :'master'
           }
       }
-      stage('build') {
+      repository('build') {
                 agent { label 'master' }
                 steps {
                     sh "mvn install"
                 }
             }
-    stage('Docker build') {
+    repository('Docker build') {
         steps {
             sh "mvn jib:build
         }
