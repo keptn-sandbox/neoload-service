@@ -27,34 +27,34 @@ spec:
               memory: "128Mi"
               cpu: "500m"
           env:
-            - name: logging-level
-              value: DEBUG
-            - name: NL_WEB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: neoload
-                  key: NL_WEB_HOST
-            - name: NL_API_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: neoload
-                  key: NL_API_HOST
-            - name: NL_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: neoload
-                  key: NL_API_TOKEN
-            - name: NL_WEB_ZONEID
-              valueFrom:
-                secretKeyRef:
-                  name: neoload
-                  key: NL_WEB_ZONEID
-            - name: NL_UPLOAD_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: neoload
-                  key: NL_UPLOAD_HOST
-            imagePullPolicy: Always
+          - name: logging-level
+            value: DEBUG
+          - name: NL_WEB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: neoload
+                key: NL_WEB_HOST
+          - name: NL_API_HOST
+            valueFrom:
+              secretKeyRef:
+                name: neoload
+                key: NL_API_HOST
+          - name: NL_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: neoload
+                key: NL_API_TOKEN
+          - name: NL_WEB_ZONEID
+            valueFrom:
+              secretKeyRef:
+                name: neoload
+                key: NL_WEB_ZONEID
+          - name: NL_UPLOAD_HOST
+            valueFrom:
+              secretKeyRef:
+                name: neoload
+                key: NL_UPLOAD_HOST
+          imagePullPolicy: Always
 ---
 apiVersion: v1
 kind: Service
