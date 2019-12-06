@@ -2,7 +2,7 @@
 kubectl delete secret neoload -n keptn --ignore-not-found
 
 # Create dynatrace-service
-NL_SERVICE_RELEASE="0.0.6"
+NL_SERVICE_RELEASE="0.6.0"
 
 print_info "Delete neoload-service $NL_SERVICE_RELEASE"
 # to update the link
