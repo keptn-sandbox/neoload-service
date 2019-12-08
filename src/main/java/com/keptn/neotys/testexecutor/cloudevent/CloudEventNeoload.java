@@ -86,7 +86,7 @@ public class CloudEventNeoload extends AbstractVerticle {
 																future -> {
 																	String result;
 																	try {
-																		NeoLoadHandler neoLoadHandler = new NeoLoadHandler(rxvertx,eventFinished, finalKeptnExtensions, receivedEvent.getId());
+																		NeoLoadHandler neoLoadHandler = new NeoLoadHandler(eventFinished, finalKeptnExtensions, receivedEvent.getId());
 
 
 																		neoLoadHandler.runNeoLoadTest(rxvertx,receivedEvent);
