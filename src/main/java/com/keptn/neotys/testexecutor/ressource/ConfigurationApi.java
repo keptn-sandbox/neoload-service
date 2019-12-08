@@ -3,11 +3,14 @@ package com.keptn.neotys.testexecutor.ressource;
 import com.google.gson.Gson;
 import com.keptn.neotys.testexecutor.exception.NeoLoadSerialException;
 import com.keptn.neotys.testexecutor.log.KeptnLogger;
+
+import io.vertx.reactivex.core.Future;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.client.HttpRequest;
 import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
+import io.vertx.reactivex.ext.web.client.predicate.ResponsePredicate;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,45 +23,47 @@ public class ConfigurationApi {
     private String projectname;
     private String stagename;
     private WebClient client;
-
-    public ConfigurationApi(KeptnLogger logger, Vertx vertx, String projectname, String stagename) {
+    private String servicename;
+    public ConfigurationApi(KeptnLogger logger, Vertx vertx, String projectname, String stagename,String service) {
         this.logger = logger;
         this.vertx = vertx;
         this.projectname = projectname;
         this.stagename = stagename;
+        this.servicename=service;
         client=WebClient.create(vertx);
     }
 
-    public KeptnRessource getRessource(String ressource) throws NeoLoadSerialException
+    public Future<KeptnRessource> getRessource(String ressource) throws NeoLoadSerialException
     {
-        String uri="/"+CONFIGURATION_VERSION+"/"+CONFIGURATION_PROJECT+"/"+projectname+"/"+CONFIGURATION_STAGE+"/"+stagename+"/"+CONFIGURATION_RESSOURCE+"/"+ressource;
+        Future<KeptnRessource> keptnRessourceFuture=Future.future();
+        String uri="/"+CONFIGURATION_VERSION+"/"+CONFIGURATION_PROJECT+"/"+projectname+"/"+CONFIGURATION_STAGE+"/"+stagename+"/"+CONFIGURATION_SERVICE+"/"+servicename+"/"+CONFIGURATION_RESSOURCE+"/"+ressource;
         KeptnRessource result = null;
-        HttpRequest<io.vertx.reactivex.core.buffer.Buffer> request = client.get(CONFIGURAITON_PORT,CONFIGURATIONAPI_HOST,uri);
+        HttpRequest<Buffer> request = client.get(CONFIGURAITON_PORT,CONFIGURATIONAPI_HOST,uri);
         request.putHeader(HEADER_ACCEPT,HEADER_APPLICATIONJSON);
+        request.expect(ResponsePredicate.SC_SUCCESS);
+        request.expect(ResponsePredicate.JSON);
+        request.expect(ResponsePredicate.status(200));
         logger.debug("Sending GET Request : "+uri);
-        AtomicReference<String> jsonBody=null;
-        AtomicReference<String> error=null;
-        request.send(ar -> {
-            if (ar.succeeded()) {
+        AtomicReference<String> jsonBody=new AtomicReference<>();
+        AtomicReference<String> error=new AtomicReference<>();
+        request.send(httpResponseAsyncResult -> {
+            if (httpResponseAsyncResult.succeeded()) {
                 // Obtain response
-                HttpResponse<Buffer> response = ar.result();
+                HttpResponse<Buffer> response = httpResponseAsyncResult.result();
                 logger.debug("Received response : "+ response.toString());
                 logger.debug("REceived following body:"+response.bodyAsString());
                 jsonBody.set(response.bodyAsString());
-            } else {
-                logger.error("ERROR while trying to get ressource file");
-                error.set("Error while trying to get the test ressource");
-
+                Gson gson = new Gson();
+                keptnRessourceFuture.complete(gson.fromJson(jsonBody.get(), KeptnRessource.class));
             }
-    });
-        if(error.get()!=null)
-            throw new NeoLoadSerialException(error.get());
-        if(jsonBody.get()!=null) {
-            Gson gson = new Gson();
-            result = gson.fromJson(jsonBody.get(), KeptnRessource.class);
-            return result;
-        }
-        else
-            return null;
+            if(httpResponseAsyncResult.failed())
+            {
+                logger.error("Request failed");
+                error.set("The API ressource failed");
+                keptnRessourceFuture.fail("The API ressource failed");
+            }
+        });
+
+        return keptnRessourceFuture;
     }
 }

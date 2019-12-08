@@ -34,13 +34,15 @@ public class NeoLoadConfiguration {
 
     public static final String TEST_STATUS_FAIL="FAILED";
 
-    public static final String CONFIGURATIONAPI_HOST="configuration-service";
+    public static final String CONFIGURATIONAPI_HOST="configuration-service.keptn.svc.cluster.local";
     public static final int CONFIGURAITON_PORT=8080;
     public static final String CONFIGURATION_PROTOCOL="http://";
     public static final String CONFIGURATION_VERSION="v1";
     public static final String CONFIGURATION_PROJECT="project";
     public static final String CONFIGURATION_STAGE="stage";
-    public static final String CONFIGURATION_RESSOURCE="ressource";
+    public static final String CONFIGURATION_RESSOURCE="resource";
+    public static final String CONFIGURATION_SERVICE="service";
+
 
     public static final String HEADER_ACCEPT="accept";
     public static final String HEADER_APPLICATIONJSON="application/json";
