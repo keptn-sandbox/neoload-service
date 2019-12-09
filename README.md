@@ -62,8 +62,8 @@ steps:
    
    ```infrastructure``` is the object describing the Load testing infrastructure required for this test.
   
-1. Once your keptn.neoload.engine.yaml file created , you will need to store in keptn by sending the following command :
+2. Once your keptn.neoload.engine.yaml file created , you will need to store in keptn by sending the following command :
 
    ```keptn add-resource --project=your-project --service=my-service --stage=your stage --resource=keptn.neoload.engine.yaml```
    
-    [here](https://keptn.sh/docs/0.6.0/installation/setup-keptn/) is the log to install the keptn_cli 
+    [here](https://keptn.sh/docs/0.6.0/installation/setup-keptn/) is the ling to keptn's documentation. 
