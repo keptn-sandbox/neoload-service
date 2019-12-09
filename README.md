@@ -27,19 +27,16 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
     1. NL_WEB_ZONEID : NeoLoad Web Zone id that would be used by Keptn
 
 
-## The NeoLoad Service requires to have the following folders in the github service repository
+## The NeoLoad Service requires to store the keptn.neoload.engine.yaml file in the ressources of keptn
 
-1. "neoload" Folder containing all the neoload tests. The NeoLaod folder will have :
-
-1. One folder for each NeoLoad project  (nlp or yaml file) containing the NeoLaod infrastructure files ( deployments of LG pods)
-
-1. One testing file describing the test to execute named `keptn.neoload.engine.yaml`
+1. Create your keptn.neoload.engine.yaml file describing the test and the infrastructure
 
 ```yaml
 steps:
 - step:
-    repository: dev
+    repository: https://yourreposistory/project.git
     project:
+    - path: /tests/neoload/load_template/load_template.nlp
     - path: /tests/neoload/catalogue_neoload.yaml
     description: BasicCheck
     scenario: BasicCheck
@@ -56,21 +53,17 @@ steps:
         lgs:
         - name: lg1
  ```
+   Here is a template of a [keptn.neoload.engine.yaml](/template/keptn.neoload.engine.yaml) file
+   The ```repository``` needs to have the url of your source control repo containing your NeoLoad tests.
+   The property ```project``` will have the list of the relative path of your neoload project files.
+   A NeoLoad project can be combined of a NeoLoad gui project ( nlp) , yaml files, or both.
+   
+   ```constant_variables``` is the object allowing you to replace the value of constant variable defined in your project.
+   
+   ```infrastructure``` is the object describing the Load testing infrastructure required for this test.
+  
+1. Once your keptn.neoload.engine.yaml file created , you will need to store in keptn by sending the following command :
 
-  All github repository will then need to have the following folders :
-  ```
-     tests
-       neoload
-         - keptn.neoload.engine.yml
-           project A
-             test.yml
-             infrastructure
-                infrastructure.yml
-           project X
-              project.nlp
-              config.zip
-              ....
-           infrastructure
-              default.yml
-   ``` 
-
+   ```keptn add-resource --project=your-project --service=my-service --stage=your stage --resource=keptn.neoload.engine.yaml```
+   
+    [here](https://keptn.sh/docs/0.6.0/installation/setup-keptn/) is the log to install the keptn_cli 

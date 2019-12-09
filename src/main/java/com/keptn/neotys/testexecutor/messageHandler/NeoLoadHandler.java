@@ -167,6 +167,7 @@ public class NeoLoadHandler {
         projectwithoutnlp.stream().forEach(file->
         {
             try {
+                logger.debug("Yaml file :  "+gitfolder.toAbsolutePath().toString()+file+" has been added in the zip");
                 FileUtils.copyFileToDirectory(new File(gitfolder.toAbsolutePath().toString()+file),path.toFile());
             } catch (IOException e) {
                 error.add(e);
@@ -178,6 +179,7 @@ public class NeoLoadHandler {
                 return new NlConstants(constants);
             }).collect(Collectors.toList()));
             Yaml yaml = new Yaml();
+
             tempfile=Optional.of(path.toAbsolutePath().toString()+"/"+keptnEventFinished.getService()+"."+keptncontext+YAML_EXTENSION);
             FileWriter writer = new FileWriter(tempfile.get());
             yaml.dump(model, writer);
@@ -221,7 +223,7 @@ public class NeoLoadHandler {
         {
             try{
 
-
+            logger.debug("Uploading zip file + "+zipfile.getAbsolutePath().toString());
             ProjectDefinition projectDefinition = runtimeApi.postUploadProject(zipfile);
             nlWebApiClient.setBasePath(NLWEB_PROTOCOL+nlapi.get()+NLWEB_APIVERSION);
             nlWebApiClient.setApiKey(nlapitoken.get());

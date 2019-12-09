@@ -1,0 +1,20 @@
+steps:
+- step:
+    repository: https://github.com/keptn-example/cart.git
+    project:
+    - path: /test/cart_basic.yaml
+    - path: /test/load_template/load_template.nlp
+    constant_variables:
+    - name: server_host
+      value: carts.sockshop-dev.svc
+    - name: server_port
+      value: 8080
+    description: CartLoad
+    scenario: CartLoad
+    infrastructure:
+      local_LG:
+      - name: lg1
+      populations:
+      - name: CartLoad
+        lgs:
+        - name: lg1
