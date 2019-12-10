@@ -3,10 +3,8 @@ package com.keptn.neotys.testexecutor.KeptnEvents;
 
 import io.vertx.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class KeptnEventFinished {
@@ -63,7 +61,7 @@ public class KeptnEventFinished {
     private String testid;
     private static final String KEY_testid="neoload_testid";
 
-    private String label;
+    private JsonObject label;
     private static final String KEY_label="label";
 
     private String neoloadURL;
@@ -71,6 +69,12 @@ public class KeptnEventFinished {
 
     private String teststatus;
     private static final String KEY_nlstatus="neoload_testStatus";
+
+    private String start;
+    private static final String KEY_start="start";
+
+    private String end;
+    private static final String KEY_end="end";
 
     public KeptnEventFinished(JsonObject object)
     {
@@ -188,7 +192,27 @@ public class KeptnEventFinished {
         this.service = service;
     }
 
+    public String getStart() {
+        return start;
+    }
 
+    public void setStart(long start) {
+        this.start = convertDateLongToString(start);
+    }
+
+    private  String convertDateLongToString(long longdate)
+    {
+        Date date=new Date(longdate);
+        SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return df2.format(date);
+    }
+    public String getEnd() {
+        return end;
+    }
+
+    public void setEnd(long end) {
+        this.end = convertDateLongToString(end);
+    }
 
     public JsonObject toJsonObject()
     {
@@ -199,23 +223,33 @@ public class KeptnEventFinished {
         jsonObject.put(KEY_deploymentstrategy,deploymentstrategy);
         jsonObject.put(KEY_project,project);
 
-        List<String> neoloaddata=new ArrayList<>();
+        HashMap<String,String> neoloaddata=new HashMap<>();
 
         if(testid!=null)
-            neoloaddata.add(KEY_testid+"="+testid);
+            neoloaddata.put(KEY_testid,testid);
         if(neoloadURL!=null)
-            neoloaddata.add(KEY_nlurl+"="+neoloadURL);
+            neoloaddata.put(KEY_nlurl,neoloadURL);
 
         if(teststatus!=null)
-            neoloaddata.add(KEY_nlstatus+"="+teststatus);
+            neoloaddata.put(KEY_nlstatus,teststatus);
 
-        if(neoloaddata.size()>0) {
-            label = neoloaddata.stream().collect(Collectors.joining(","));
+        if(start!=null)
+            jsonObject.put(KEY_start,start);
+
+        if(end!=null)
+            jsonObject.put(KEY_end,end);
+
+        if(neoloaddata.size()>0)
+        {
+            label=new JsonObject();
+            neoloaddata.forEach((s, s2) -> {
+                label.put(s,s2);
+            });
             jsonObject.put(KEY_label, label);
+
         }
-        otherdata.entrySet().forEach(pair->{
-            jsonObject.put(pair.getKey(),pair.getValue());
-        });
+
+
 
         return jsonObject;
     }
