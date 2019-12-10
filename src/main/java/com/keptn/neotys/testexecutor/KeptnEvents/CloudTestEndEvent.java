@@ -40,7 +40,7 @@ public class CloudTestEndEvent {
         this.shkeptncontext = shkeptncontext;
         OffsetDateTime now = OffsetDateTime.now( ZoneOffset.UTC );
         DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
-                .ofPattern("yyyy-MM-dd'T'HH:mm:ss:SSSXXXXX");
+                .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX");
         this.time =   now.format(DATE_TIME_FORMATTER);
         this.specversion = specversion;
         this.source = source;
