@@ -14,9 +14,11 @@ import com.keptn.neotys.testexecutor.ressource.ConfigurationApi;
 import com.keptn.neotys.testexecutor.ressource.KeptnRessource;
 import com.neotys.ascode.swagger.client.ApiClient;
 import com.neotys.ascode.swagger.client.ApiException;
+import com.neotys.ascode.swagger.client.api.ResultsApi;
 import com.neotys.ascode.swagger.client.api.RuntimeApi;
 import com.neotys.ascode.swagger.client.model.ProjectDefinition;
 import com.neotys.ascode.swagger.client.model.RunTestDefinition;
+import com.neotys.ascode.swagger.client.model.TestDefinition;
 import io.cloudevents.CloudEvent;
 import io.vertx.reactivex.core.Future;
 import io.vertx.reactivex.core.Vertx;
@@ -62,6 +64,7 @@ public class NeoLoadHandler {
         this.stage=keptnEventFinished.getStage();
         eventid=eventid;
         tempfile=Optional.empty();
+        this.extensions=extensions;
 
 
     }
@@ -246,6 +249,11 @@ public class NeoLoadHandler {
                 logger.info("Test has finished with sucess");
 
             keptnEventFinished.setTeststatus(teststatus);
+
+            ResultsApi resultsApi=new ResultsApi(nlWebApiClient);
+            TestDefinition testdefinition=resultsApi.getTest(runTestDefinition.getTestId());
+            keptnEventFinished.setStart(testdefinition.getStartDate());
+            keptnEventFinished.setEnd(testdefinition.getEndDate());
             return neoLoadWebTest;
 
             }

@@ -5,7 +5,7 @@ public class NeoLoadConfiguration {
     public static final int KUBETIMEOUT=60;
     public static String HEALTH_PATH="/health";
     public static String NEOLOAD_SOURCE = "neoload-service";
-    public static String KEPTN_EVENT_HOST = "api.keptn.svc.cluster.local";
+    public static String KEPTN_EVENT_HOST = "event-broker.keptn.svc.cluster.local";
     public static String KEPTN_EVENT_URL = "keptn";
     public static int KEPTN_PORT=8080;
     public static int KEPTN_PORT_EVENT=80;
@@ -43,6 +43,7 @@ public class NeoLoadConfiguration {
     public static final String CONFIGURATION_RESSOURCE="resource";
     public static final String CONFIGURATION_SERVICE="service";
 
+    public static final String CONTENT_TYPE="Content-Type";
 
     public static final String HEADER_ACCEPT="accept";
     public static final String HEADER_APPLICATIONJSON="application/json";
