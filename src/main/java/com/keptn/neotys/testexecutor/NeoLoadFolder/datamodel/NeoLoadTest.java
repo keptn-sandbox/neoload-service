@@ -21,9 +21,8 @@ import java.util.stream.Collectors;
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 
 public class NeoLoadTest {
-	String repository;
-	String teststrategy;
 	String branch;
+	String repository;
 	List<Project> project;
 	String description;
 	String scenario;
@@ -36,9 +35,8 @@ public class NeoLoadTest {
 		constant_variables = new ArrayList<>();
 	}
 
-	public NeoLoadTest(String repository, List<Project> project, String description, String scenario, @Nullable Infrastructure infrastructure, @Nullable String global_infrasctructure, @Nullable List<Constants> constant_variables,@Nullable String branch,String teststrategy) {
+	public NeoLoadTest(String repository, List<Project> project, String description, String scenario, @Nullable Infrastructure infrastructure, @Nullable String global_infrasctructure, @Nullable List<Constants> constant_variables,@Nullable String branch) {
 		this.repository = repository;
-		this.teststrategy=teststrategy;
 		this.project = project;
 		this.branch=branch;
 		this.description = description;
@@ -46,14 +44,6 @@ public class NeoLoadTest {
 		this.infrastructure = infrastructure;
 		this.global_infrasctructure = global_infrasctructure;
 		this.constant_variables = constant_variables;
-	}
-
-	public String getTeststrategy() {
-		return teststrategy;
-	}
-
-	public void setTeststrategy(String teststrategy) {
-		this.teststrategy = teststrategy;
 	}
 
 	public String getBranch() {
@@ -284,8 +274,7 @@ public class NeoLoadTest {
 	public String toString() {
 		return "NeoLoadTest{" +
 				"repository='" + repository + '\'' +
-				", branch='" + getBranch() +"\'"+
-				", teststrategy='" + getTeststrategy() +"\'"+
+				",branch='"+ getBranch() +"\'"+
 				", project=" + project +
 				", description='" + description + '\'' +
 				", scenario='" + scenario + '\'' +
