@@ -18,6 +18,7 @@ public class NeoLoadConfiguration {
     public static String HEADER_KEPTNCONTEXT="shkeptncontext";
     public static String HEADER_datacontentype="datacontenttype";
 
+    public static final String DEFAULT_BRANCH="master";
     public static final String YML_EXTENSION=".yml";
     public static final String YAML_EXTENSION=".yaml";
     public static final String NLP_EXTENSION=".nlp";

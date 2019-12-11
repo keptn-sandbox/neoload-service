@@ -1,6 +1,7 @@
 steps:
 - step:
     repository: https://github.com/keptn-example/cart.git
+    branch: master
     project:
     - path: /test/cart_basic.yaml
     - path: /test/load_template/load_template.nlp
