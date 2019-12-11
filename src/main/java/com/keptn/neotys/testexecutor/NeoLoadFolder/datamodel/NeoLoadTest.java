@@ -22,6 +22,7 @@ import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 
 public class NeoLoadTest {
 	String branch;
+	String teststrategy;
 	String repository;
 	List<Project> project;
 	String description;
@@ -35,10 +36,11 @@ public class NeoLoadTest {
 		constant_variables = new ArrayList<>();
 	}
 
-	public NeoLoadTest(String repository, List<Project> project, String description, String scenario, @Nullable Infrastructure infrastructure, @Nullable String global_infrasctructure, @Nullable List<Constants> constant_variables,@Nullable String branch) {
+	public NeoLoadTest(String repository, List<Project> project, String description, String scenario, @Nullable Infrastructure infrastructure, @Nullable String global_infrasctructure, @Nullable List<Constants> constant_variables,@Nullable String branch,String teststrategy) {
 		this.repository = repository;
 		this.project = project;
 		this.branch=branch;
+		this.teststrategy=teststrategy;
 		this.description = description;
 		this.scenario = scenario;
 		this.infrastructure = infrastructure;
@@ -50,6 +52,14 @@ public class NeoLoadTest {
 		if(branch==null)
 			branch=DEFAULT_BRANCH;
 		return branch;
+	}
+
+	public String getTeststrategy() {
+		return teststrategy;
+	}
+
+	public void setTeststrategy(String teststrategy) {
+		this.teststrategy = teststrategy;
 	}
 
 	public void setBranch(String branch) {
@@ -275,6 +285,7 @@ public class NeoLoadTest {
 		return "NeoLoadTest{" +
 				"repository='" + repository + '\'' +
 				",branch='"+ getBranch() +"\'"+
+				",teststrategy='"+ getTeststrategy() +"\'"+
 				", project=" + project +
 				", description='" + description + '\'' +
 				", scenario='" + scenario + '\'' +
