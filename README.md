@@ -36,6 +36,7 @@ steps:
 - step:
     repository: https://yourreposistory/project.git
     branch: master
+    teststrategy: performance
     project:
     - path: /tests/neoload/load_template/load_template.nlp
     - path: /tests/neoload/catalogue_neoload.yaml
