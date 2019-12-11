@@ -35,6 +35,7 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
 steps:
 - step:
     repository: https://yourreposistory/project.git
+    branch: master
     project:
     - path: /tests/neoload/load_template/load_template.nlp
     - path: /tests/neoload/catalogue_neoload.yaml

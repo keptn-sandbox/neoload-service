@@ -33,7 +33,7 @@ public class NeoLoadConfiguration {
     public static final String NLWEB_APIVERSION="/v1";
 
     public static final String TEST_STATUS_FAIL="FAILED";
-
+    public static final String DEFAULT_BRANCH="master";
     public static final String CONFIGURATIONAPI_HOST="configuration-service.keptn.svc.cluster.local";
     public static final int CONFIGURAITON_PORT=8080;
     public static final String CONFIGURATION_PROTOCOL="http://";

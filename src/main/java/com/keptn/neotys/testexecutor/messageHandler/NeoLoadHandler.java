@@ -387,7 +387,7 @@ public class NeoLoadHandler {
                     logger.debug("Clonning repo :"+step.getStep().getRepository());
 
                     try {
-                        gitfolder=getNeoLoadTestFolder(getGitHubFolder(step.getStep().getRepository()));
+                        gitfolder=getNeoLoadTestFolder(getGitHubFolder(step.getStep().getRepository()),step.getStep().getBranch());
                     } catch (IOException e) {
                         error.append("Technical Error while retrieveing repository "+e.getMessage());
                     } catch (NeoLoadJgitExeption neoLoadJgitExeption) {
@@ -420,7 +420,7 @@ public class NeoLoadHandler {
 
 
 
-    private Path getNeoLoadTestFolder(String ressource)
+    private Path getNeoLoadTestFolder(String ressource,String branch)
     {
         try {
 
@@ -434,7 +434,7 @@ public class NeoLoadHandler {
                 Git result = Git.cloneRepository()
                         .setURI(getGitHubFolder(ressource))
                         .setDirectory(localPath.toFile())
-                        //.setBranch(keptnEventFinished.getRepository())
+                        .setBranch(branch)
                         .call();
 
 

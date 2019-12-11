@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 
 public class NeoLoadTest {
+	String branch;
 	String repository;
 	List<Project> project;
 	String description;
@@ -34,14 +35,25 @@ public class NeoLoadTest {
 		constant_variables = new ArrayList<>();
 	}
 
-	public NeoLoadTest(String repository, List<Project> project, String description, String scenario, @Nullable Infrastructure infrastructure, @Nullable String global_infrasctructure, @Nullable List<Constants> constant_variables) {
+	public NeoLoadTest(String repository, List<Project> project, String description, String scenario, @Nullable Infrastructure infrastructure, @Nullable String global_infrasctructure, @Nullable List<Constants> constant_variables,@Nullable String branch) {
 		this.repository = repository;
 		this.project = project;
+		this.branch=branch;
 		this.description = description;
 		this.scenario = scenario;
 		this.infrastructure = infrastructure;
 		this.global_infrasctructure = global_infrasctructure;
 		this.constant_variables = constant_variables;
+	}
+
+	public String getBranch() {
+		if(branch==null)
+			branch=DEFAULT_BRANCH;
+		return branch;
+	}
+
+	public void setBranch(String branch) {
+		this.branch = branch;
 	}
 
 	public String getRepository() {
@@ -262,6 +274,7 @@ public class NeoLoadTest {
 	public String toString() {
 		return "NeoLoadTest{" +
 				"repository='" + repository + '\'' +
+				",branch='"+ getBranch() +"\'"+
 				", project=" + project +
 				", description='" + description + '\'' +
 				", scenario='" + scenario + '\'' +
