@@ -204,7 +204,7 @@ public class KeptnEventFinished {
     {
         Date date=new Date(longdate);
 
-        SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
+        SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         return df2.format(date);
     }
     public String getEnd() {
