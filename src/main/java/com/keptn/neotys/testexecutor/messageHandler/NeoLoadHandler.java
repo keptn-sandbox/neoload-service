@@ -383,7 +383,7 @@ public class NeoLoadHandler {
                 StringBuilder error=new StringBuilder();
 
                 //---for each test start test -----
-                neoLoadTestStepList.stream().forEach(step->{
+                neoLoadTestStepList.stream().filter(neoLoadTestStep -> neoLoadTestStep.getStep().getTeststrategy().equalsIgnoreCase(keptnEventFinished.getTeststrategy())).forEach(step->{
                     logger.debug("Clonning repo :"+step.getStep().getRepository());
 
                     try {
