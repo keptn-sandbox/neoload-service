@@ -203,7 +203,8 @@ public class KeptnEventFinished {
     private  String convertDateLongToString(long longdate)
     {
         Date date=new Date(longdate);
-        SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+        SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
         return df2.format(date);
     }
     public String getEnd() {

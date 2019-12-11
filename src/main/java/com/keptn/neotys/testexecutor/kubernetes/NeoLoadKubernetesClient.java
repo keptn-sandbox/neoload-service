@@ -170,17 +170,21 @@ public class NeoLoadKubernetesClient {
                     {
                         logger.debug("deployController - : pod controller not ready :");
                         // do something useful here
-                        return true;
+                        return false;
                     }
                     else
-                        return false;
+                    {
+                        logger.info("deployController - : pod controller is ready ");
+                        return true;
+
+                    }
 
                 }
             };
             Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                     .retryIfResult(Predicates.<Boolean>equalTo(false))
                     .retryIfRuntimeException()
-                    .withWaitStrategy(WaitStrategies.fixedWait( 1, TimeUnit.SECONDS))
+                    .withWaitStrategy(WaitStrategies.fixedWait( 3, TimeUnit.SECONDS))
                     .withStopStrategy(StopStrategies.stopAfterDelay(5, TimeUnit.MINUTES))
                     .build();
             try {
@@ -258,25 +262,17 @@ public class NeoLoadKubernetesClient {
                     .done();
 
 
-
-           /* while(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).isReady())
-            {
-                logger.debug("deployLG - : pod LG not ready :");
-                Thread.sleep(1000);
-            }*/
-
-
-
             Callable<Boolean> callable = new Callable<Boolean>() {
                 public Boolean call() throws Exception {
                     if(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).isReady())
                     {
-                        logger.debug("deployLG - : pod LG not ready :");
-                        // do something useful here
+                        logger.info("deployLG - : pod LG not ready :");
+                        return false;
+                    }
+                    else {
+                        logger.info("deployLG - : pod LG  is ready :");
                         return true;
                     }
-                    else
-                        return false;
 
                 }
             };
@@ -284,7 +280,7 @@ public class NeoLoadKubernetesClient {
             Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                     .retryIfResult(Predicates.<Boolean>equalTo(false))
                     .retryIfRuntimeException()
-                    .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS))
+                    .withWaitStrategy(WaitStrategies.fixedWait(3, TimeUnit.SECONDS))
                     .withStopStrategy(StopStrategies.stopAfterDelay(5, TimeUnit.MINUTES))
                     .build();
             try {
