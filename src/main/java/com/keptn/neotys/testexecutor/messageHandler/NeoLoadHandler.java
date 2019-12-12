@@ -126,11 +126,12 @@ public class NeoLoadHandler {
     					.forEach(path -> {
     						ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
     						try {
+    						    logger.debug("Compress - adding "+pp.relativize(path).toString());
     							zs.putNextEntry(zipEntry);
     							Files.copy(path, zs);
     							zs.closeEntry();
     						} catch (IOException e) {
-    							System.err.println(e);
+    						    logger.error("Issue to generate the zip ",e);
     						}
     					});
     		}
@@ -184,9 +185,15 @@ public class NeoLoadHandler {
             Yaml yaml = new Yaml();
 
             tempfile=Optional.of(path.toAbsolutePath().toString()+"/"+keptnEventFinished.getService()+"."+keptncontext+YAML_EXTENSION);
-            FileWriter writer = new FileWriter(tempfile.get());
-            yaml.dump(model, writer);
-
+            try {
+                yaml.dump(model, new FileWriter(tempfile.get()));
+                logger.debug("Constant yaml file created : " + tempfile.get());
+            }
+            catch (IOException e)
+            {
+                logger.error("Issue to create the constant yaml file",e);
+                error.add(e);
+            }
         }
          if(error.size()>0)
         {
@@ -214,6 +221,10 @@ public class NeoLoadHandler {
         if(!nlzoneid.isPresent())
             throw new NeoLoadJgitExeption("No Neoload web zone id Defined. installtion of the neoload service has not been configured properly");
 
+        if(!zipfile.exists())
+            throw new NeoLoadJgitExeption("Zip file does not exists "+ zipfile.getAbsolutePath().toString());
+
+
         ApiClient nlWebApiClient=new ApiClient();
         nlWebApiClient.setApiKey(nlapitoken.get());
         nlWebApiClient.setBasePath(NLWEB_PROTOCOL+uploadurl.get()+NLWEB_APIVERSION);
@@ -227,6 +238,9 @@ public class NeoLoadHandler {
             try{
 
             logger.debug("Uploading zip file + "+zipfile.getAbsolutePath().toString());
+
+            logger.debug(zipfile.getAbsolutePath().toString()+" is "+ zipfile.getUsableSpace()+" bytes");
+
             ProjectDefinition projectDefinition = runtimeApi.postUploadProject(zipfile);
             nlWebApiClient.setBasePath(NLWEB_PROTOCOL+nlapi.get()+NLWEB_APIVERSION);
             nlWebApiClient.setApiKey(nlapitoken.get());
@@ -257,11 +271,17 @@ public class NeoLoadHandler {
             return neoLoadWebTest;
 
             }
+            catch (ApiException e)
+            {
+                logger.error("Technical Error ",e);
+                throw e;
+            }
             catch(Exception e)
             {
                 logger.error("Technical Error ",e);
                 throw new NeoLoadJgitExeption("Technical error "+ e.getMessage());
             }
+
         }
         else
         {
