@@ -62,7 +62,7 @@ public class KeptnEventFinished {
     private static final String KEY_testid="neoload_testid";
 
     private JsonObject label;
-    private static final String KEY_label="label";
+    private static final String KEY_label="labels";
 
     private String neoloadURL;
     private static final String KEY_nlurl="neoload_url";
