@@ -33,7 +33,7 @@ public class ConfigurationApi {
         client=WebClient.create(vertx);
     }
 
-    public KeptnRessource toKeptnRessource(String content)
+    private KeptnRessource toKeptnRessource(String content)
     {
         Gson gson = new Gson();
         return gson.fromJson(content, KeptnRessource.class);
