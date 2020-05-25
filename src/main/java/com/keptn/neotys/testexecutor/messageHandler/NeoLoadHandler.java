@@ -62,7 +62,7 @@ public class NeoLoadHandler {
         logger.setKepncontext(extensions.getShkeptncontext());
         keptncontext=extensions.getShkeptncontext();
         this.stage=keptnEventFinished.getStage();
-        eventid=eventid;
+        this.eventid=eventid;
         tempfile=Optional.empty();
         this.extensions=extensions;
 

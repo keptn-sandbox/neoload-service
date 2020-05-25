@@ -12,7 +12,9 @@ import io.vertx.reactivex.ext.web.Router;
 
 
 import java.io.EOFException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import static com.keptn.neotys.testexecutor.KeptnEvents.EventType.KEPTN_TEST_STARTING;
@@ -24,7 +26,7 @@ public class CloudEventNeoload extends AbstractVerticle {
 	KeptnLogger loger;
 
 	private  Vertx rxvertx;
-
+    private List<String> lisofKeptnContext=new ArrayList<>();
 	public void start() {
 		rxvertx= Vertx.newInstance(this.getVertx());
 		loger=new KeptnLogger(this.getClass().getName());
@@ -79,37 +81,47 @@ public class CloudEventNeoload extends AbstractVerticle {
 														String keptncontext = keptnExtensions.getShkeptncontext();
 														loger.setKepncontext(keptncontext);
 														loger.debug("Received data " + eventFinished.toString());
-														KeptnExtensions finalKeptnExtensions = keptnExtensions;
-														req.response().setStatusCode(200).putHeader("content-type", "text/plain").end("event received");
+														if(lisofKeptnContext.contains(keptncontext))
+														{
+															///-----already received this event-------------
+															req.response().setStatusCode(210).putHeader("content-type", "text/plain").end("event already received- currently processed");
+															//----------------------------------------------
+														}
+														else
+														{
+															//----new event received----
+															lisofKeptnContext.add(keptncontext);
+															KeptnExtensions finalKeptnExtensions = keptnExtensions;
+															req.response().setStatusCode(200).putHeader("content-type", "text/plain").end("event received");
 
-														vertx.<String>executeBlocking(
-																future -> {
-																	String result;
-																	try {
-																		NeoLoadHandler neoLoadHandler = new NeoLoadHandler(eventFinished, finalKeptnExtensions, receivedEvent.getId());
+															vertx.<String>executeBlocking(
+																	future -> {
+																		String result;
+																		try {
+																			NeoLoadHandler neoLoadHandler = new NeoLoadHandler(eventFinished, finalKeptnExtensions, receivedEvent.getId());
 
 
-																		neoLoadHandler.runNeoLoadTest(rxvertx,receivedEvent);
-																		result="test has finished";
-																		future.complete(result);
-																	}
-																	catch (Exception e)
+																			neoLoadHandler.runNeoLoadTest(rxvertx, receivedEvent);
+																			result = "test has finished";
+																			lisofKeptnContext.remove(keptncontext);
+																			future.complete(result);
+																		} catch (Exception e) {
+																			result = "Exception :" + e.getMessage();
+																			future.fail(result);
+																		}
+																	}, res ->
 																	{
-																		result="Exception :"+e.getMessage();
-																		future.fail(result);
+																		if (res.succeeded()) {
+
+																			//req.response().setStatusCode(200).putHeader("content-type", "text/plain").end(res.result());
+
+																		} else {
+																			res.cause().printStackTrace();
+																		}
 																	}
-																},res->
-																{
-																	if (res.succeeded()) {
 
-																		//req.response().setStatusCode(200).putHeader("content-type", "text/plain").end(res.result());
-
-																	} else {
-																		res.cause().printStackTrace();
-																	}
-																}
-
-														);
+															);
+														}
 
 
 													}
