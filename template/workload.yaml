@@ -1,0 +1,17 @@
+workloads:
+- teststrategy: performance
+  script:
+    repository: https://github.com/yourREPO.git
+    project:
+    - path: /test/cart_basic.yaml
+    - path: /test/load_template/load_template.nlp
+  description: CartLoad
+  properties:
+    scenario: CartLoad
+    constant_variables:
+    - name: server_host
+      value: carts.sockshop-dev.svc
+  infrastructure:
+    managedbyKeptn: false
+    numberOfMachine: 4
+    zoneId : rest

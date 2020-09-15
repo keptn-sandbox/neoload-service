@@ -14,19 +14,19 @@ pipeline {
   stages {
       repository('Checkout') {
           agent { label 'master' }
-          steps {
+          workloads {
                git  url:"https://github.com/${GROUP}/${APP_NAME}.git",
                       branch :'master'
           }
       }
       repository('build') {
                 agent { label 'master' }
-                steps {
+                workloads {
                     sh "mvn install"
                 }
             }
     repository('Docker build') {
-        steps {
+        workloads {
             sh "mvn jib:build
         }
      }

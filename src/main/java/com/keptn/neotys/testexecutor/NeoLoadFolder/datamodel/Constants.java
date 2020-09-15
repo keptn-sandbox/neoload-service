@@ -27,4 +27,12 @@ public class Constants {
     public void setValue(String value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "Constants{" +
+                "name=" + name +
+                " value ="+ value+
+                '}';
+    }
 }

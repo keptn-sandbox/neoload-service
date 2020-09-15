@@ -13,24 +13,24 @@ public class TestexecutorApplicationTests {
 	@Test
 	public void contextLoads() throws IOException {
 
-		String yaml ="steps:\n" +
-				"- step:\n" +
-				"    repository: https://github.com/keptn-example/cart.git\n" +
-				"    project:\n" +
-				"    - path: /test/cart_basic.yaml\n" +
-				"    - path: /test/load_template/load_template.nlp\n" +
+		String yaml ="workloads:\n" +
+				"  - teststrategy: performance\n" +
+				"    script:\n" +
+				"      repository: https://github.com/keptn-example/cart.git\n" +
+				"      project:\n" +
+				"      - path: /test/cart_basic.yaml\n" +
+				"      - path: /test/load_template/load_template.nlp\n" +
 				"    description: CartLoad\n" +
-				"    scenario: CartLoad\n" +
-				"    constant_variables:\n" +
-				"    - name: server_host\n" +
-				"      value: carts.sockshop-dev.svc\n" +
+				"    properties:\n" +
+				"      scenario: CartLoad\n" +
+				"      constant_variables:\n" +
+				"      - name: server_host\n" +
+				"        value: carts.sockshop-dev.svc\n" +
 				"    infrastructure:\n" +
-				"      local_LG:\n" +
-				"      - name: lg1\n" +
-				"      populations :\n" +
-				"      - name: CartLoad\n" +
-				"        lgs:\n" +
-				"        - name: lg1";
+				"      managedbyKeptn: false\n" +
+				"      numberOfMachine: 4 \n" +
+				"      zoneId : rest\n" +
+				"    ";
 
 		InputStream targetStream = new ByteArrayInputStream(yaml.getBytes());
 

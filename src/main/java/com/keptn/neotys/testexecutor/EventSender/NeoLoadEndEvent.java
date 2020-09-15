@@ -54,11 +54,11 @@ public class NeoLoadEndEvent  {
     //  }
     //}
 
-    public void endevent(KeptnEventFinished data, KeptnExtensions extensions, CloudEvent<Object> receivedEvent)
+    public void endevent(KeptnEventFinished data, KeptnExtensions extensions, CloudEvent<Object> receivedEvent, String keptn_namespace)
     {
         try {
             logger.debug("endevent : Start sending event");
-            final HttpClientRequest request = vertx.createHttpClient().post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST, "/"+KEPTN_EVENT_URL);
+            final HttpClientRequest request = vertx.createHttpClient().post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+KEPTN_EVENT_URL);
 
             logger.debug("endevent : Defining cloud envet with data:" + data.toJsonObject().toString());
 
@@ -71,7 +71,7 @@ public class NeoLoadEndEvent  {
 
             WebClient client=WebClient.create(vertx);
 
-            HttpRequest<Buffer> httpRequest=client.post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST, "/"+KEPTN_EVENT_URL);
+            HttpRequest<Buffer> httpRequest=client.post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+KEPTN_EVENT_URL);
 
             httpRequest.putHeader(CONTENT_TYPE,CONTENTYPE_CLOUD);
             String contentype;

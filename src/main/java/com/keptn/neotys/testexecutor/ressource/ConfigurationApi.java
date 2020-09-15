@@ -24,6 +24,8 @@ public class ConfigurationApi {
     private String stagename;
     private WebClient client;
     private String servicename;
+    private String keptnNAMESPACE;
+
     public ConfigurationApi(KeptnLogger logger, Vertx vertx, String projectname, String stagename,String service) {
         this.logger = logger;
         this.vertx = vertx;
@@ -31,6 +33,7 @@ public class ConfigurationApi {
         this.stagename = stagename;
         this.servicename=service;
         client=WebClient.create(vertx);
+        this.keptnNAMESPACE=System.getenv(SECRET_KEPTN_NAMESPACE);
     }
 
     private KeptnRessource toKeptnRessource(String content)
@@ -103,7 +106,7 @@ public class ConfigurationApi {
     public Future<String> getRessourceByURL(String uri) throws NeoLoadSerialException
     {
         Future<String> stringFuture=Future.future();
-        HttpRequest<Buffer> request = client.get(CONFIGURAITON_PORT,CONFIGURATIONAPI_HOST,uri);
+        HttpRequest<Buffer> request = client.get(CONFIGURAITON_PORT,CONFIGURATIONAPI_HOST+keptnNAMESPACE+KEPTN_END_URL,uri);
         request.putHeader(HEADER_ACCEPT,HEADER_APPLICATIONJSON);
         request.expect(ResponsePredicate.SC_SUCCESS);
         request.expect(ResponsePredicate.JSON);

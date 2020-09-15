@@ -14,11 +14,10 @@ kubectl -n keptn create secret generic neoload --from-literal="NL_WEB_HOST=$NL_W
 NL_SERVICE_RELEASE="0.7.0"
 
 echo "Deploying neoload-service $NL_SERVICE_RELEASE"
-# to update the link
-wget https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/service.yaml -O service.yaml
+# download the deployment files
+wget https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/service_withdynatrace.yaml -O service.yaml
 wget https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/distributor.yaml -O distributor.yaml
 #replace the namespace in the deployment
-
 [  -z "$1" ] && NAMESPACE="keptn" || NAMESPACE=$1
 
 sed -i 's/NAMESPACE_TO_REPLACE/$NAMESPACE/' service.yaml

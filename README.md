@@ -15,7 +15,6 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
 
 
 
-
 ## Install service <a id="install"></a>
 
 1. To install the service, you need to run :
@@ -26,36 +25,33 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
     1. NL_API_TOKEN: api token of your NeoLoad account
     1. NL_WEB_ZONEID : NeoLoad Web Zone id that would be used by Keptn
 
+you can also take advantage of the native dyntrace integration by
 
-## The NeoLoad Service requires to store the keptn.neoload.engine.yaml file in the ressources of keptn
+## The NeoLoad Service requires to store the workload.yaml file in the ressources of keptn
 
 1. Create your keptn.neoload.engine.yaml file describing the test and the infrastructure
 
 ```yaml
-steps:
-- step:
-    repository: https://yourreposistory/project.git
-    branch: master
-    teststrategy: performance
+workloads:
+- teststrategy: performance
+  script:
+    repository: https://github.com/yourREPO.git
     project:
-    - path: /tests/neoload/load_template/load_template.nlp
-    - path: /tests/neoload/catalogue_neoload.yaml
-    description: BasicCheck
-    scenario: BasicCheck
+    - path: /test/cart_basic.yaml
+    - path: /test/load_template/load_template.nlp
+  description: CartLoad
+  properties:
+    scenario: CartLoad
     constant_variables:
     - name: server_host
-      value: catalog-service.orders-project-dev.svc
-    - name: server_port
-      value: 8080
-    infrastructure:
-      local_LG:
-      - name: lg1
-      populations:
-      - name: BasicCheck
-        lgs:
-        - name: lg1
+      value: carts.sockshop-dev.svc
+  infrastructure:
+    managedbyKeptn: false
+    numberOfMachine: 4
+    zoneId : rest
+    
  ```
-   Here is a template of a [keptn.neoload.engine.yaml](/template/keptn.neoload.engine.yaml) file
+   Here is a template of a [workload.yaml](/template/workload.yaml) file
    The ```repository``` needs to have the url of your source control repo containing your NeoLoad tests.
    The property ```project``` will have the list of the relative path of your neoload project files.
    A NeoLoad project can be combined of a NeoLoad gui project ( nlp) , yaml files, or both.
@@ -66,6 +62,6 @@ steps:
   
 2. Once your keptn.neoload.engine.yaml file created , you will need to store in keptn by sending the following command :
 
-   ```keptn add-resource --project=your-project --service=my-service --stage=your stage --resource=keptn.neoload.engine.yaml```
+   ```keptn add-resource --project=your-project --service=my-service --stage=your stage --resource=workload.yaml```
    
     [here](https://keptn.sh/docs/0.6.0/installation/setup-keptn/) is the ling to keptn's documentation. 

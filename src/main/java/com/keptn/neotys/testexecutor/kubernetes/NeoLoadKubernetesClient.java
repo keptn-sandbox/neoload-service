@@ -37,6 +37,9 @@ public class NeoLoadKubernetesClient {
     private Optional<String> neoloadweb_url;
     private Optional<String> neoloadweb_apiurl;
     private Optional<String> neoloadweb_uploadurl;
+    private Optional<String> dynatrace_api_token;
+    private Optional<String> dynatrace_tenant;
+    private String keptn_NAMESPACE;
     private String context;
     private KeptnLogger logger;
     private static final String DEFAULT_MASTER_URL="https://kubernetes.default.svc";
@@ -58,6 +61,23 @@ public class NeoLoadKubernetesClient {
         logger.setKepncontext(kepncontext);
 
         getSecrets();
+    }
+
+
+    public Optional<String> getDynatrace_api_token() {
+        return dynatrace_api_token;
+    }
+
+    public void setDynatrace_api_token(Optional<String> dynatrace_api_token) {
+        this.dynatrace_api_token = dynatrace_api_token;
+    }
+
+    public Optional<String> getDynatrace_tenant() {
+        return dynatrace_tenant;
+    }
+
+    public void setDynatrace_tenant(Optional<String> dynatrace_tenant) {
+        this.dynatrace_tenant = dynatrace_tenant;
     }
 
     public Optional<String> getNeoloadZoneid() {
@@ -101,7 +121,19 @@ public class NeoLoadKubernetesClient {
         neoloadweb_url=Optional.ofNullable(System.getenv(SECRET_NL_WEB_HOST));
         neoloadZoneid=Optional.ofNullable(System.getenv(SECRET_NL_ZONEID));
         neoloadweb_uploadurl=Optional.ofNullable(System.getenv(SECRET_NL_UPLOAD_HOST));
+        dynatrace_api_token=Optional.ofNullable(System.getenv(SECRET_DT_API_TOKEN));
+        dynatrace_tenant=Optional.ofNullable(System.getenv(SECRET_DT_TENANT));
+        keptn_NAMESPACE=System.getenv(SECRET_KEPTN_NAMESPACE);
     }
+
+    public String getKeptn_NAMESPACE() {
+        return keptn_NAMESPACE;
+    }
+
+    public void setKeptn_NAMESPACE(String keptn_NAMESPACE) {
+        this.keptn_NAMESPACE = keptn_NAMESPACE;
+    }
+
     public void deleteController()
     {
         try
@@ -109,12 +141,12 @@ public class NeoLoadKubernetesClient {
             this.client = new DefaultKubernetesClient(config);
 
             logger.debug("deleteController - : delete service with label :"+NEOLOAD+"_"+CONTROLLER+","+NEOLOAD+context );
-            client.services().inNamespace(KEPTN_EVENT_URL)
+            client.services().inNamespace(keptn_NAMESPACE)
                     .withName(NEOLOAD+context)
                     .delete();
             logger.debug("deleteController - : delete pod with label :"+NEOLOAD+"_"+CONTROLLER+","+NEOLOAD+context );
 
-            client.pods().inNamespace(KEPTN_EVENT_URL)
+            client.pods().inNamespace(keptn_NAMESPACE)
                     .withName(NEOLOAD+context)
                     .delete();
 
@@ -131,7 +163,7 @@ public class NeoLoadKubernetesClient {
             this.client = new DefaultKubernetesClient(config);
 
             logger.debug("deployController - : deploying pod with label :"+NEOLOAD+"_"+CONTROLLER+","+NEOLOAD+context );
-            client.pods().inNamespace(KEPTN_EVENT_URL).createNew()
+            client.pods().inNamespace(keptn_NAMESPACE).createNew()
                         .withNewMetadata()
                         .withName(NEOLOAD+context)
                         .addToLabels(NEOLOAD+"_"+CONTROLLER,NEOLOAD+context)
@@ -148,7 +180,7 @@ public class NeoLoadKubernetesClient {
                         .done();
             logger.debug("deployController - : deploying service with label :"+NEOLOAD+"_"+CONTROLLER+","+NEOLOAD+context );
 
-            client.services().inNamespace(KEPTN_EVENT_URL).createNew()
+            client.services().inNamespace(keptn_NAMESPACE).createNew()
                     .withNewMetadata()
                     .withName(NEOLOAD+context)
                     .addToLabels(NEOLOAD+"_"+CONTROLLER,NEOLOAD+context)
@@ -166,7 +198,7 @@ public class NeoLoadKubernetesClient {
 
             Callable<Boolean> callable = new Callable<Boolean>() {
                 public Boolean call() throws Exception {
-                    if(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+context).isReady())
+                    if(!client.pods().inNamespace(keptn_NAMESPACE).withName(NEOLOAD+context).isReady())
                     {
                         logger.debug("deployController - : pod controller not ready :");
                         // do something useful here
@@ -224,7 +256,7 @@ public class NeoLoadKubernetesClient {
 
             logger.debug("deleteLG - : delete pods with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+context +suffix);
 
-            client.pods().inNamespace(KEPTN_EVENT_URL)
+            client.pods().inNamespace(keptn_NAMESPACE)
                     .withName(NEOLOAD+LGname+context+suffix)
                     .delete();
 
@@ -242,7 +274,7 @@ public class NeoLoadKubernetesClient {
 
             logger.debug("deployLG - : deploying pod with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+LGname+context+suffix );
 
-            client.pods().inNamespace(KEPTN_EVENT_URL).createNew()
+            client.pods().inNamespace(keptn_NAMESPACE).createNew()
                     .withNewMetadata()
                     .withName(NEOLOAD+LGname+context+suffix)
                     .addToLabels(NEOLOAD+"_"+LG,NEOLOAD+LGname+context+suffix)
@@ -264,7 +296,7 @@ public class NeoLoadKubernetesClient {
 
             Callable<Boolean> callable = new Callable<Boolean>() {
                 public Boolean call() throws Exception {
-                    if(!client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).isReady())
+                    if(!client.pods().inNamespace(keptn_NAMESPACE).withName(NEOLOAD+LGname+context+suffix).isReady())
                     {
                         logger.info("deployLG - : pod LG not ready :");
                         return false;
@@ -285,7 +317,7 @@ public class NeoLoadKubernetesClient {
                     .build();
             try {
                 retryer.call(callable);
-                logger.debug(client.pods().inNamespace(KEPTN_EVENT_URL).withName(NEOLOAD+LGname+context+suffix).get().getStatus().getPodIP());
+                logger.debug(client.pods().inNamespace(keptn_NAMESPACE).withName(NEOLOAD+LGname+context+suffix).get().getStatus().getPodIP());
 
             } catch (RetryException e) {
                 logger.error("deployLG error ",e);
@@ -394,7 +426,7 @@ public class NeoLoadKubernetesClient {
 
     private String generateServiceName(String type,String suffix)
     {
-        return NEOLOAD+type+context+suffix+"."+KEPTN_EVENT_URL+".svc.cluster.local";
+        return NEOLOAD+type+context+suffix+"."+keptn_NAMESPACE+".svc.cluster.local";
     }
 
     private void createEnvList(final List<EnvVar> list )
