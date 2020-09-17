@@ -13,7 +13,7 @@ public class NeoLoadConfiguration {
     public static String GITHUB="https://github.com/";
     public static String NEOLOAD_GITFOLDER="Gitfolder";
     public static String LOGING_LEVEL_KEY="logging-level";
-    public static String NEOLOAD_CONFIG_FILE="workload.yml";
+    public static String NEOLOAD_CONFIG_FILE="workload.yaml";
     public static String NEOLOAD_FOLDER="tests/neoload";
     public static String TMP_NEOLOAD_FOLDER="/tempneoload";
     public static String HEADER_KEPTNCONTEXT="shkeptncontext";
