@@ -57,15 +57,15 @@ spec:
                 name: neoload
                 key: NL_UPLOAD_HOST
           - name: DT_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: dynatrace
-                  key: DT_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dynatrace
+                key: DT_API_TOKEN
           - name: DT_TENANT
-              valueFrom:
-                secretKeyRef:
-                  name: dynatrace
-                  key: DT_TENANT
+            valueFrom:
+              secretKeyRef:
+                name: dynatrace
+                key: DT_TENANT
           imagePullPolicy: Always
 ---
 apiVersion: v1
