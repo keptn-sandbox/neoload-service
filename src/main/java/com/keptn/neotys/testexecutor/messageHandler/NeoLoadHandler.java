@@ -304,7 +304,7 @@ public class NeoLoadHandler {
             }
             catch (ApiException e)
             {
-                logger.error("Technical Error ",e);
+                logger.error("Technical Error Body:"+e.getResponseBody(),e);
                 throw e;
             }
             catch(Exception e)
