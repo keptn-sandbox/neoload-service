@@ -426,8 +426,9 @@ public class NeoLoadHandler {
                                     neoLoadKubernetesClient.deleteLG(machine);
 
                               });
+                            neoLoadKubernetesClient.deleteController();
                         }
-                        neoLoadKubernetesClient.deleteController();
+
                     }
                 }
                 catch (Exception e)
