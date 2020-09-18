@@ -436,11 +436,12 @@ public class NeoLoadHandler {
                     logger.error("Unable to delete services ",e);
                 }
             }
-            try {
-                deletetempfolder();
+            /*try {
+                //deletetempfolder();
+                logger.debug("Folder deleted");
             } catch (IOException e) {
                 logger.error("Unable to delete temp folder ",e);
-            }
+            }*/
         }
     }
 

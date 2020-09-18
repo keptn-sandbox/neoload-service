@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public class TestingProperties {
     List<Constants> constant_variables;
-
+    String workspaceid;
 
     String scenario;
 
@@ -15,6 +15,20 @@ public class TestingProperties {
         this.constant_variables = new ArrayList<>();
 
 
+    }
+
+    public TestingProperties(List<Constants> constant_variables, String workspaceid, String scenario) {
+        this.constant_variables = constant_variables;
+        this.workspaceid = workspaceid;
+        this.scenario = scenario;
+    }
+
+    public String getWorkspaceid() {
+        return workspaceid;
+    }
+
+    public void setWorkspaceid(String workspaceid) {
+        this.workspaceid = workspaceid;
     }
 
     public TestingProperties(List<Constants> constant_variables, String scenario) {
