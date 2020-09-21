@@ -3,7 +3,7 @@ package com.keptn.neotys.testexecutor.kubernetes;
 public class DockerConstants {
 
     public static final String CONTROLLER="controller";
-    public static final String LG="LG";
+    public static final String LG="nllg";
     public static final String LGname="lg";
     public static final String NEOLOAD="neoload";
     public static final String NEOLAOD_LG_DOCKER="neotys/neoload-loadgenerator:latest";
