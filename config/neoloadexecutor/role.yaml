@@ -7,3 +7,17 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "services","routes"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: podcreat-neoload-binding
+  namespace: NAMESPACE_TO_REPLACE
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: podcreat-neoload-grantor
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: system:serviceaccounts:qa
+  name: user-1
