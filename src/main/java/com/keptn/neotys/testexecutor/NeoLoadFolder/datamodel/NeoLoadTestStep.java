@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
+import static com.keptn.neotys.testexecutor.kubernetes.DockerConstants.LG;
 
 public class NeoLoadTestStep {
 	String description;
@@ -155,7 +156,7 @@ public class NeoLoadTestStep {
 				{
 					for (int i=0;i<optionalInfrastructure.get().getNumberOfMachine().intValue();i++)
 					{
-						machinenameList.add(properties.getScenario()+"_LG_"+String.valueOf(i));
+						machinenameList.add(properties.getScenario()+"_"+LG+"_"+String.valueOf(i));
 					}
 
 				}
