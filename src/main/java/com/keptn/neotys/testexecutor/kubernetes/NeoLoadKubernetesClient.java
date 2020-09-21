@@ -257,7 +257,7 @@ public class NeoLoadKubernetesClient {
             logger.debug("deleteLG - : delete pods with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+context +suffix);
 
             client.pods().inNamespace(keptn_NAMESPACE)
-                    .withName(context+suffix)
+                    .withName(NEOLOAD+"-"+context+"-"+suffix)
                     .delete();
 
 
@@ -276,18 +276,18 @@ public class NeoLoadKubernetesClient {
 
             client.pods().inNamespace(keptn_NAMESPACE).createNew()
                     .withNewMetadata()
-                    .withName(context+suffix)
-                    .addToLabels(NEOLOAD+"_"+LG,context+suffix)
+                    .withName(NEOLOAD+"-"+context+"-"+suffix)
+                    .addToLabels(NEOLOAD+"-"+LG,context+"-"+suffix)
                     .endMetadata()
                     .withNewSpec()
                     .addNewContainer()
-                    .withName(context+suffix)
+                    .withName(NEOLOAD+"-"+context+"-"+suffix)
                     .withNewImage(NEOLAOD_LG_DOCKER)
                     .withEnv(lgenv(suffix))
                     .withImagePullPolicy("IfNotPresent")
                     .withPorts(lgPort())
                     .endContainer()
-                    .withHostname(context+suffix)
+                    .withHostname(NEOLOAD+"-"+context+"-"+suffix)
                     .withHostNetwork(true)
                     .withDnsPolicy("ClusterFirstWithHostNet")
                     .endSpec()
@@ -296,7 +296,7 @@ public class NeoLoadKubernetesClient {
 
             Callable<Boolean> callable = new Callable<Boolean>() {
                 public Boolean call() throws Exception {
-                    if(!client.pods().inNamespace(keptn_NAMESPACE).withName(NEOLOAD+LGname+context+suffix).isReady())
+                    if(!client.pods().inNamespace(keptn_NAMESPACE).withName(NEOLOAD+"-"+context+"-"+suffix).isReady())
                     {
                         logger.info("deployLG - : pod LG not ready :");
                         return false;
@@ -317,7 +317,7 @@ public class NeoLoadKubernetesClient {
                     .build();
             try {
                 retryer.call(callable);
-                logger.debug(client.pods().inNamespace(keptn_NAMESPACE).withName(NEOLOAD+LGname+context+suffix).get().getStatus().getPodIP());
+                logger.debug(client.pods().inNamespace(keptn_NAMESPACE).withName(NEOLOAD+"-"+context+"-"+suffix).get().getStatus().getPodIP());
 
             } catch (RetryException e) {
                 logger.error("deployLG error ",e);

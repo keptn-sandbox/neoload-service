@@ -156,7 +156,7 @@ public class NeoLoadTestStep {
 				{
 					for (int i=0;i<optionalInfrastructure.get().getNumberOfMachine().intValue();i++)
 					{
-						machinenameList.add(properties.getScenario()+"_"+LG+"_"+String.valueOf(i));
+						machinenameList.add(properties.getScenario().toLowerCase()+"-"+String.valueOf(i));
 					}
 
 				}
