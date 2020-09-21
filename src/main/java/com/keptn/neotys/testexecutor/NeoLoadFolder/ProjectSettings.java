@@ -9,6 +9,7 @@ public class ProjectSettings {
     private static final String DYNATRACE_ENABLED="dynatrace_enabled";
     private static final String DYNATRACE_URL="dynatrace_url";
     private static final String DYNATRACE_TOKEN="dynatrace_token";
+
     String dynatrace_url ;
     String dynatrace_token ;
     Boolean dynatrace_enabled;
@@ -54,10 +55,11 @@ public class ProjectSettings {
                 {
                     case DYNATRACE_ENABLED:
                         return new NodeTuple(representData("dynatrace.enabled"), defaultNode.getValueNode());
-                    case DYNATRACE_TOKEN:
-                        return new NodeTuple(representData("dynatrace.url"), defaultNode.getValueNode());
                     case DYNATRACE_URL:
+                        return new NodeTuple(representData("dynatrace.url"), defaultNode.getValueNode());
+                    case DYNATRACE_TOKEN:
                         return new NodeTuple(representData("dynatrace.token"), defaultNode.getValueNode());
+
                     default:
                         return defaultNode;
                 }

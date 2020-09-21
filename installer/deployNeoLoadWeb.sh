@@ -18,11 +18,15 @@ echo "Deploying neoload-service $NL_SERVICE_RELEASE"
 # to update the link
 wget https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/service.yaml -O service.yaml
 wget https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/distributor.yaml -O distributor.yaml
+wget https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/role.yaml -O role.yaml
+
 #replace the namespace in the deployment
 
 
 
 sed -i "s/NAMESPACE_TO_REPLACE/$NAMESPACE/" service.yaml
 sed -i "s/NAMESPACE_TO_REPLACE/$NAMESPACE/" distributor.yaml
+sed -i "s/NAMESPACE_TO_REPLACE/$NAMESPACE/" role.yaml
+kubectl apply -f role.yaml
 kubectl apply -f service.yaml
 kubectl apply -f distributor.yaml

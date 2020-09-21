@@ -31,6 +31,7 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -143,6 +144,26 @@ public class NeoLoadHandler {
         boolean delete=deleteDirectory(new File(gitfolder.toAbsolutePath().toString()+TMP_NEOLOAD_FOLDER));
     }
 
+    private void logYamlFile(String path)
+    {
+        try
+        {
+            File myObj = new File(path);
+            Scanner myReader = new Scanner(myObj);
+            logger.debug("Looking a the content of the file "+path);
+            StringBuilder stringBuilder=new StringBuilder();
+            while (myReader.hasNextLine()) {
+                stringBuilder.append(myReader.nextLine()+"\n") ;
+            }
+            logger.debug(stringBuilder.toString());
+            myReader.close();
+        }
+     catch (FileNotFoundException e) {
+            logger.error("Error while parsing files ",e);
+        }
+
+    }
+
     private String getAsCodeFiles(List<Project> projectPath)
     {
         List<String> projectwithoutnlp=projectPath.stream().map(pro->{return pro.getPath();}).filter(file->!file.toLowerCase().contains(NLP_EXTENSION)).collect(Collectors.toList());
@@ -173,7 +194,9 @@ public class NeoLoadHandler {
         {
             try {
                 logger.debug("Yaml file :  "+gitfolder.toAbsolutePath().toString()+file+" has been added in the zip");
+                logYamlFile(gitfolder.toAbsolutePath().toString()+file);
                 FileUtils.copyFileToDirectory(new File(gitfolder.toAbsolutePath().toString()+file),path.toFile());
+
             } catch (IOException e) {
                 error.add(e);
             }
@@ -186,8 +209,9 @@ public class NeoLoadHandler {
             Yaml yaml;
             if(dynatraceTenant.isPresent()&& dynatraceToken.isPresent())
             {
-                model.setProjectSettings(new ProjectSettings( true,dynatraceTenant.get(),dynatraceToken.get()));
-                yaml=new Yaml(model.getProjectSettings().getRepresenter());
+                model.setProject_settings(new ProjectSettings( true,dynatraceTenant.get(),dynatraceToken.get()));
+                yaml=new Yaml(model.getProject_settings().getRepresenter());
+
             }
             else
             {
@@ -199,6 +223,7 @@ public class NeoLoadHandler {
             try {
                 yaml.dump(model, new FileWriter(tempfile.get()));
                 logger.debug("Constant yaml file created : " + tempfile.get());
+                logYamlFile(tempfile.get());
             }
             catch (IOException e)
             {
@@ -211,13 +236,14 @@ public class NeoLoadHandler {
             if(dynatraceTenant.isPresent()&& dynatraceToken.isPresent())
             {
                 NeoLoadModel model=new NeoLoadModel();
-                model.setProjectSettings(new ProjectSettings( true,dynatraceTenant.get(),dynatraceToken.get()));
-                Yaml yaml=new Yaml(model.getProjectSettings().getRepresenter());
+                model.setProject_settings(new ProjectSettings( true,dynatraceTenant.get(),dynatraceToken.get()));
+                Yaml yaml=new Yaml(model.getProject_settings().getRepresenter());
 
                 tempfile=Optional.of(path.toAbsolutePath().toString()+"/"+keptnEventFinished.getService()+"."+keptncontext+YAML_EXTENSION);
                 try {
                     yaml.dump(model, new FileWriter(tempfile.get()));
                     logger.debug("Constant yaml file created : " + tempfile.get());
+                    logYamlFile(tempfile.get());
                 }
                 catch (IOException e)
                 {
@@ -436,12 +462,12 @@ public class NeoLoadHandler {
                     logger.error("Unable to delete services ",e);
                 }
             }
-            /*try {
-                //deletetempfolder();
+            try {
+                deletetempfolder();
                 logger.debug("Folder deleted");
             } catch (IOException e) {
                 logger.error("Unable to delete temp folder ",e);
-            }*/
+            }
         }
     }
 
