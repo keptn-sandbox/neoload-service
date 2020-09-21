@@ -16,7 +16,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: podcreat-neoload-grantor
+  name: podcreat-neoload
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   name: system:serviceaccounts:NAMESPACE_TO_REPLACE
