@@ -25,8 +25,22 @@ During the setup of NeoLaod, a secret is created that contains key-value pairs f
     1. NL_API_TOKEN: api token of your NeoLoad account
     1. NL_WEB_ZONEID : NeoLoad Web Zone id that would be used by Keptn
 
-you can also take advantage of the native dyntrace integration by
+you can also take advantage of the native dyntrace integration by running the dedicated installer.*
 
+2. Run the installer script
+ * there are 2 type of installation
+   1. installing the neoload-service with dynatrace
+   If the dynatrace-service has been previously installed then you can run:
+`installer/deployNeoLoadWebWithDynatrace.sh <name of you keptn namespace>`    
+    Once deployed the neoload-service will had the right project settings to run a test with the dynatrace integration.
+    The Enduser will still need to configure the tags in each scenario.
+    
+    2. Installing the neoload-service
+`installer/deployNeoLoadWeb.sh <name of you keptn namespace>`    
+    
+    
+
+    
 ## The NeoLoad Service requires to store the workload.yaml file in the ressources of keptn
 
 1. Create your keptn.neoload.engine.yaml file describing the test and the infrastructure
@@ -60,8 +74,18 @@ workloads:
    
    ```infrastructure``` is the object describing the Load testing infrastructure required for this test.
   
-2. Once your keptn.neoload.engine.yaml file created , you will need to store in keptn by sending the following command :
+2. Once your workload.yaml file created , you will need to store in keptn by sending the following command :
 
    ```keptn add-resource --project=your-project --service=my-service --stage=your stage --resource=workload.yaml```
    
     [here](https://keptn.sh/docs/0.6.0/installation/setup-keptn/) is the ling to keptn's documentation. 
+
+
+###How to uninstall the NeoLoad-service
+
+Run the following script
+* if Neoload-service with dynatrace
+`installer/uninstallNeoLoadServiceWithDynatrace.sh <name of you keptn namespace>`    
+
+* if NeoLoad-service installed without dynatrace
+`installer/uninstallNeoLoadService.sh <name of you keptn namespace>`    
