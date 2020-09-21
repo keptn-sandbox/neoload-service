@@ -257,7 +257,7 @@ public class NeoLoadKubernetesClient {
             logger.debug("deleteLG - : delete pods with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+context +suffix);
 
             client.pods().inNamespace(keptn_NAMESPACE)
-                    .withName(NEOLOAD+LGname+context+suffix)
+                    .withName(context+suffix)
                     .delete();
 
 
@@ -276,18 +276,18 @@ public class NeoLoadKubernetesClient {
 
             client.pods().inNamespace(keptn_NAMESPACE).createNew()
                     .withNewMetadata()
-                    .withName(NEOLOAD+LGname+context+suffix)
-                    .addToLabels(NEOLOAD+"_"+LG,NEOLOAD+LGname+context+suffix)
+                    .withName(context+suffix)
+                    .addToLabels(NEOLOAD+"_"+LG,context+suffix)
                     .endMetadata()
                     .withNewSpec()
                     .addNewContainer()
-                    .withName(NEOLOAD+LGname+context+suffix)
+                    .withName(context+suffix)
                     .withNewImage(NEOLAOD_LG_DOCKER)
                     .withEnv(lgenv(suffix))
                     .withImagePullPolicy("IfNotPresent")
                     .withPorts(lgPort())
                     .endContainer()
-                    .withHostname(NEOLOAD+LGname+context+suffix)
+                    .withHostname(context+suffix)
                     .withHostNetwork(true)
                     .withDnsPolicy("ClusterFirstWithHostNet")
                     .endSpec()
