@@ -34,6 +34,9 @@ public class NeoLoadConfiguration {
     public static final String SECRET_DT_TENANT="DT_TENANT";
     public static final String SECRET_KEPTN_NAMESPACE="KEPTN_NAMESPACE";
 
+    public static final String SECRET_NL_CONTROLLER_DCK_IMMAGE="NL_DOCKER_CTL_IMAGE";
+    public static final String SECRET_NL_LG_DCK_IMMAGE="NL_DOCKER_LG_IMAGE";
+
     public static final String NLWEB_PROTOCOL="https://";
     public static final String NLWEB_APIVERSION="/v1";
 

@@ -85,7 +85,15 @@ workloads:
 
 Run the following script
 * if Neoload-service with dynatrace
-`installer/uninstallNeoLoadServiceWithDynatrace.sh <name of you keptn namespace>`    
+`installer/uninstallNeoLoadServiceWithDynatrace.sh -n <name of you keptn namespace>`    
 
 * if NeoLoad-service installed without dynatrace
-`installer/uninstallNeoLoadService.sh <name of you keptn namespace>`    
+`installer/uninstallNeoLoadService.sh -n <name of you keptn namespace>` 
+
+### Deploy the service by using custom NeoLoad docker images
+* if Neoload-service with dynatrace
+`installer/uninstallNeoLoadServiceWithDynatrace.sh -n <name of you keptn namespace> -c <controller image> -l <lg image>`    
+
+* if NeoLoad-service installed without dynatrace
+`installer/uninstallNeoLoadService.sh -n <name of you keptn namespace> -c <controller image> -l <lg image>` 
+   

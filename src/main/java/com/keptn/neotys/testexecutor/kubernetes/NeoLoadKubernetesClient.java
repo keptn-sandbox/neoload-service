@@ -39,6 +39,8 @@ public class NeoLoadKubernetesClient {
     private Optional<String> neoloadweb_uploadurl;
     private Optional<String> dynatrace_api_token;
     private Optional<String> dynatrace_tenant;
+    private Optional<String> nl_docker_ctl_image;
+    private Optional<String> nl_docker_lg_image;
     private String keptn_NAMESPACE;
     private String context;
     private KeptnLogger logger;
@@ -123,6 +125,9 @@ public class NeoLoadKubernetesClient {
         neoloadweb_uploadurl=Optional.ofNullable(System.getenv(SECRET_NL_UPLOAD_HOST));
         dynatrace_api_token=Optional.ofNullable(System.getenv(SECRET_DT_API_TOKEN));
         dynatrace_tenant=Optional.ofNullable(System.getenv(SECRET_DT_TENANT));
+        nl_docker_ctl_image=Optional.ofNullable(System.getenv(SECRET_NL_CONTROLLER_DCK_IMMAGE));
+        nl_docker_lg_image=Optional.ofNullable(System.getenv(SECRET_NL_LG_DCK_IMMAGE));
+
         keptn_NAMESPACE=System.getenv(SECRET_KEPTN_NAMESPACE);
     }
 
@@ -162,6 +167,12 @@ public class NeoLoadKubernetesClient {
         {
             this.client = new DefaultKubernetesClient(config);
 
+            String image;
+            if(nl_docker_ctl_image.isPresent())
+                image=nl_docker_ctl_image.get();
+            else
+                image=NEOLAOD_CTL_DOCKER;
+
             logger.debug("deployController - : deploying pod with label :"+NEOLOAD+"_"+CONTROLLER+","+NEOLOAD+context );
             client.pods().inNamespace(keptn_NAMESPACE).createNew()
                         .withNewMetadata()
@@ -173,7 +184,7 @@ public class NeoLoadKubernetesClient {
                         .withName(NEOLOAD+context)
                         .withImagePullPolicy("IfNotPresent")
                         .withPorts(controllerPort())
-                        .withNewImage(NEOLAOD_CTL_DOCKER)
+                        .withNewImage(image)
                         .withEnv(controllerEnv())
                         .endContainer()
                         .endSpec()
@@ -273,6 +284,11 @@ public class NeoLoadKubernetesClient {
             this.client = new DefaultKubernetesClient(config);
 
             logger.debug("deployLG - : deploying pod with label :"+NEOLOAD+"_"+LG+","+NEOLOAD+LGname+context+suffix );
+            String image;
+            if(nl_docker_lg_image.isPresent())
+                image=nl_docker_lg_image.get();
+            else
+                image=NEOLAOD_LG_DOCKER;
 
             client.pods().inNamespace(keptn_NAMESPACE).createNew()
                     .withNewMetadata()
@@ -282,7 +298,7 @@ public class NeoLoadKubernetesClient {
                     .withNewSpec()
                     .addNewContainer()
                     .withName(NEOLOAD+"-"+context+"-"+suffix)
-                    .withNewImage(NEOLAOD_LG_DOCKER)
+                    .withNewImage(image)
                     .withEnv(lgenv(suffix))
                     .withImagePullPolicy("IfNotPresent")
                     .withPorts(lgPort())
