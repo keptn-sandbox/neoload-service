@@ -57,9 +57,9 @@ spec:
                 name: neoload
                 key: NL_UPLOAD_HOST
           - name: NL_DOCKER_CTL_IMAGE
-            value: NLCTL_IMAGE_TOREPALCE
+            value: NLCTL_IMAGE_TOREPLACE
           - name: NL_DOCKER_LG_IMAGE
-            value : NLLG_IMAGE_TOREPALCE
+            value : NLLG_IMAGE_TOREPLACE
           imagePullPolicy: Always
 ---
 apiVersion: v1

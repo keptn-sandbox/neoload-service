@@ -45,8 +45,8 @@ else
      exit 0
   else
      wget https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/config/neoloadexecutor/service_customimage.yaml -O service.yaml
-     sed -i "s/NLCTL_IMAGE_TOREPALCE/$CONTROLLER/" service.yaml
-     sed -i "s/NLLG_IMAGE_TOREPALCE/$LG/" service.yaml
+     sed -i "s,NLCTL_IMAGE_TOREPLACE,$CONTROLLER," service.yaml
+     sed -i "s,NLLG_IMAGE_TOREPLACE,$LG," service.yaml
   fi
 fi
 #replace the namespace in the deployment
