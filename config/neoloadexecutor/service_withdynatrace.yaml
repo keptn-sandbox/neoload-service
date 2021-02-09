@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: neoload-service
-          image: hrexed/keptn_neoload:latest
+          image: neotyspartnersolution/keptn_neoload:latest
           ports:
             - containerPort: 8080
           resources:
