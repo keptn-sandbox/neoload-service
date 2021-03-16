@@ -8,9 +8,15 @@ public class KeptnExtensions implements Extension {
 
     private String shkeptncontext;
     private String contenttype;
+    private String triggeredid;
+    private String shkeptnspecversion;
 
     //Mandatory to let cloud-events lib instatiate class
-    public KeptnExtensions() {
+    public KeptnExtensions(String shkeptncontext, String contenttype, String triggeredid, String shkeptnspecversion) {
+        this.contenttype=contenttype;
+        this.shkeptncontext=shkeptncontext;
+        this.triggeredid=triggeredid;
+        this.shkeptnspecversion=shkeptnspecversion;
     }
 
     public KeptnExtensions(final String shkeptncontext, final String datacontenttype) {
@@ -31,6 +37,30 @@ public class KeptnExtensions implements Extension {
 
     public void setDatacontenttype(String datacontenttype) {
         this.contenttype = datacontenttype;
+    }
+
+    public String getContenttype() {
+        return contenttype;
+    }
+
+    public void setContenttype(String contenttype) {
+        this.contenttype = contenttype;
+    }
+
+    public String getTriggeredid() {
+        return triggeredid;
+    }
+
+    public void setTriggeredid(String triggeredid) {
+        this.triggeredid = triggeredid;
+    }
+
+    public String getShkeptnspecversion() {
+        return shkeptnspecversion;
+    }
+
+    public void setShkeptnspecversion(String shkeptnspecversion) {
+        this.shkeptnspecversion = shkeptnspecversion;
     }
 
     @Override
@@ -55,6 +85,9 @@ public class KeptnExtensions implements Extension {
         return "KeptExtension{" +
                 "shkeptncontext='" + shkeptncontext + '\'' +
                 ", datacontenttype='" + contenttype + '\'' +
+                ", triggeredid='" + triggeredid + '\'' +
+                ", shkeptnspecversion='" + shkeptnspecversion + '\'' +
+
                 '}';
     }
 }

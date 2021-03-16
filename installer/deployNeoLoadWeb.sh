@@ -31,7 +31,7 @@ kubectl -n "$NAMESPACE" create secret generic neoload --from-literal="NL_WEB_HOS
 
 
 # Create dynatrace-service
-NL_SERVICE_RELEASE="0.7.0"
+NL_SERVICE_RELEASE="0.8.0"
 
 echo "Deploying neoload-service $NL_SERVICE_RELEASE"
 # to update the link

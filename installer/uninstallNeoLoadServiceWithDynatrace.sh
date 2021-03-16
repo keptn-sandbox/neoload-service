@@ -25,7 +25,7 @@ kubectl delete secret neoload -n "$NAMESPACE" --ignore-not-found
 
 
 # Create dynatrace-service
-NL_SERVICE_RELEASE="0.7.0"
+NL_SERVICE_RELEASE="0.8.0"
 
 echo "Delete neoload-service $NL_SERVICE_RELEASE"
 wget https://raw.githubusercontent.com/keptn-contrib/neoload-service/$NL_SERVICE_RELEASE/config/neoloadexecutor/distributor.yaml -O distributor.yaml

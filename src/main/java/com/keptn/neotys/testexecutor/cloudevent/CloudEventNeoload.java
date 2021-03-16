@@ -72,8 +72,10 @@ public class CloudEventNeoload extends AbstractVerticle {
 													{
 														Optional<String> kepncontext = Optional.ofNullable(req.getHeader(HEADER_KEPTNCONTEXT));
 														Optional<String> datacontent = Optional.ofNullable(req.getHeader(HEADER_datacontentype));
-														if(kepncontext.isPresent()&& datacontent.isPresent())
-															keptnExtensions=new KeptnExtensions(kepncontext.get(),datacontent.get());
+														Optional<String> shkeptnspecversion=Optional.ofNullable(req.getHeader(HEADER_shkeptnspecversion));
+														Optional<String> triggeredid=Optional.ofNullable(req.getHeader(HEADER_triggeredid));
+														if(kepncontext.isPresent()&& datacontent.isPresent() && shkeptnspecversion.isPresent() && triggeredid.isPresent())
+															keptnExtensions=new KeptnExtensions(kepncontext.get(),datacontent.get(),shkeptnspecversion.get(),triggeredid.get());
 													}
 
 													if(keptnExtensions!=null)

@@ -8,8 +8,32 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-public class CloudTestEndEvent {
-
+public class CloudTestEvent {
+//{
+//  "data": {
+//    "project": "sockshop",
+//    "stage": "dev",
+//    "service": "carts",
+//    "labels": {
+//      "label-key": "label-value"
+//    },
+//    "status": "succeeded",
+//    "result": "pass",
+//    "message": "a message",
+//    "test": {
+//      "start": "2019-10-20T07:57:27.152330783Z",
+//      "end": "2019-10-20T08:57:27.152330783Z",
+//      "gitCommit": "ca82a6dff817gc66f44342007202690a93763949"
+//    }
+//  },
+//  "datacontenttype": "application/json",
+//  "id": "c4d3a334-6cb9-4e8c-a372-7e0b45942f53",
+//  "shkeptncontext": "a3e5f16d-8888-4720-82c7-6995062905c1",
+//  "source": "source-service",
+//  "specversion": "1.0",
+//  "triggeredid": "3f9640b6-1d2a-4f11-95f5-23259f1d82d6",
+//  "type": "sh.keptn.event.test.finished"
+//}
     private String type;
     private static final String KEY_type="type";
 
@@ -22,6 +46,10 @@ public class CloudTestEndEvent {
     private String time;
     private static final String KEY_time="time";
 
+    private String shkeptnspecversion;
+    private static final String KEY_shkeptnspecversion="shkeptnspecversion";
+
+
     private String specversion;
     private static final String KEY_specversion="specversion";
 
@@ -31,10 +59,13 @@ public class CloudTestEndEvent {
     private String id;
     private static final String KEY_id="id";
 
+    private String triggeredid;
+    private static final String KEY_triggeredid="triggeredid";
+
     private JsonObject data;
     private static final String KEY_data="data";
 
-    public CloudTestEndEvent(String type, String contenttype, String shkeptncontext, String specversion, String source, String id, JsonObject data) {
+    public CloudTestEvent(String type, String contenttype, String shkeptncontext, String specversion, String source, String id, String triggeredid, String shkeptnspecversion, JsonObject data) {
         this.type = type;
         this.contenttype = contenttype;
         this.shkeptncontext = shkeptncontext;
@@ -47,6 +78,24 @@ public class CloudTestEndEvent {
         this.source = source;
         this.id = id;
         this.data = data;
+        this.triggeredid=triggeredid;
+        this.shkeptnspecversion=shkeptnspecversion;
+    }
+
+    public String getShkeptnspecversion() {
+        return shkeptnspecversion;
+    }
+
+    public void setShkeptnspecversion(String shkeptnspecversion) {
+        this.shkeptnspecversion = shkeptnspecversion;
+    }
+
+    public String getTriggeredid() {
+        return triggeredid;
+    }
+
+    public void setTriggeredid(String triggeredid) {
+        this.triggeredid = triggeredid;
     }
 
     public String getType() {
@@ -125,6 +174,8 @@ public class CloudTestEndEvent {
         result.put(KEY_specversion,specversion);
         result.put(KEY_time,time);
         result.put(KEY_type,type);
+        result.put(KEY_shkeptnspecversion,shkeptnspecversion);
+        result.put(KEY_triggeredid,triggeredid);
 
         return result;
     }

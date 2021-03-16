@@ -1,6 +1,6 @@
 package com.keptn.neotys.testexecutor.messageHandler;
 
-import com.keptn.neotys.testexecutor.EventSender.NeoLoadEndEvent;
+import com.keptn.neotys.testexecutor.EventSender.NeoLoadEvent;
 import com.keptn.neotys.testexecutor.KeptnEvents.KeptnEventFinished;
 import com.keptn.neotys.testexecutor.NeoLoadFolder.ProjectSettings;
 import com.keptn.neotys.testexecutor.NeoLoadFolder.datamodel.*;
@@ -262,7 +262,7 @@ public class NeoLoadHandler {
         return compressNLProject(path.toAbsolutePath().toString(),projectName+keptnEventFinished.getService());
 
     }
-    private NeoLoadWebTest RunTest(File zipfile, NeoLoadTestStep test, Optional<String> nlapi, Optional<String> nlapitoken, Optional<String> nlurl, Optional<String> uploadurl, Optional<String> nlzoneid, int size) throws ApiException, NeoLoadJgitExeption {
+    private NeoLoadWebTest RunTest(File zipfile, NeoLoadTestStep test, Optional<String> nlapi, Optional<String> nlapitoken, Optional<String> nlurl, Optional<String> uploadurl, Optional<String> nlzoneid, int size, NeoLoadEvent neoLoadEvent, CloudEvent<Object> receivedEvent, String keptn_namespace) throws ApiException, NeoLoadJgitExeption {
        if(!nlapi.isPresent())
            throw new NeoLoadJgitExeption("No API URL Defined. installtion of the neoload service has not been configured properly");
 
@@ -306,6 +306,12 @@ public class NeoLoadHandler {
             RunTestDefinition runTestDefinition = runtimeApi.getTestsRun(KEPTN_EVENT_URL+"_"+keptnEventFinished.getProject()+"_"+keptnEventFinished.getService()+"_"+test.getProperties().getScenario(), projectDefinition.getProjectId(), test.getProperties().getScenario(), test.getDescription(),getAsCodeFiles(test.getScript().getProject()),null,null,null,null,nlzoneid.get(),nlzoneid.get()+":"+String.valueOf(size));
             NeoLoadWebTest neoLoadWebTest=new NeoLoadWebTest(runTestDefinition.getTestId(),NLWEB_PROTOCOL+nlurl.get() + "/#!trend/?scenario=" + test.getProperties().getScenario() + "&limit=-1&project=" + projectDefinition.getProjectId(),NLWEB_PROTOCOL+nlurl.get() + "/#!result/" + runTestDefinition.getTestId() + "/overview");
 
+            ///---send the test started event----
+            keptnEventFinished.setMessage("Test started : "+neoLoadWebTest.getTesturl());
+            keptnEventFinished.setStatus("succeeded");
+            keptnEventFinished.setResult("Test Started");
+            neoLoadEvent.sendTestStarted(keptnEventFinished,extensions,receivedEvent,keptn_namespace);
+
 
             logger.info("Trending URL : " + neoLoadWebTest.getTrendingurl());
             logger.info("Testing result url : " + neoLoadWebTest.getTesturl());
@@ -325,6 +331,9 @@ public class NeoLoadHandler {
             TestDefinition testdefinition=resultsApi.getTest(runTestDefinition.getTestId());
             keptnEventFinished.setStart(testdefinition.getStartDate());
             keptnEventFinished.setEnd(testdefinition.getEndDate());
+            keptnEventFinished.setMessage("Test Ended : "+neoLoadWebTest.getTesturl());
+            keptnEventFinished.setStatus(testdefinition.getStatus().getValue());
+            keptnEventFinished.setResult("Neoload test ended");
             return neoLoadWebTest;
 
             }
@@ -418,17 +427,20 @@ public class NeoLoadHandler {
         }
         try
         {
+                NeoLoadEvent neoLoadEvent=new NeoLoadEvent(logger,eventid,rxvertx);
+
                 List<String> projectspath=test.getScript().getProject().stream().map(project -> project.getPath()).collect(Collectors.toList());
                 String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject(),Optional.ofNullable(test.getProperties().getConstant_variables()),neoLoadKubernetesClient.getDynatrace_tenant(),neoLoadKubernetesClient.getDynatrace_api_token());
 
                 Thread.sleep(20000);
 
-                NeoLoadWebTest loadWebTest=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),Optional.ofNullable(zoneid),numberofInstances);
+
+                //run the test
+                NeoLoadWebTest loadWebTest=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),Optional.ofNullable(zoneid),numberofInstances,neoLoadEvent,receivedEvent,neoLoadKubernetesClient.getKeptn_NAMESPACE());
                 keptnEventFinished.setTestid(loadWebTest.getTestid());
                 keptnEventFinished.setNeoloadURL(loadWebTest.getTesturl());
-                ///---
-                NeoLoadEndEvent endEvent=new NeoLoadEndEvent(logger,eventid,rxvertx);
-                endEvent.endevent(keptnEventFinished,extensions,receivedEvent,neoLoadKubernetesClient.getKeptn_NAMESPACE());
+                ///--
+                neoLoadEvent.endevent(keptnEventFinished,extensions,receivedEvent,neoLoadKubernetesClient.getKeptn_NAMESPACE());
                 //--send end event-------------
 
 
@@ -471,6 +483,7 @@ public class NeoLoadHandler {
         }
     }
 
+
     public void runNeoLoadTest(Vertx rxvertx, CloudEvent<Object> receivedEvent) throws NeoLoadJgitExeption, NeoLoadSerialException, IOException {
        // gitfolder = getNeoLoadTestFolder();
         Future<List<NeoLoadTestStep>> listFuture=getRessources(rxvertx);
@@ -482,7 +495,7 @@ public class NeoLoadHandler {
                 StringBuilder error=new StringBuilder();
 
                 //---for each test start test -----
-                neoLoadTestStepList.stream().filter(neoLoadTestStep -> neoLoadTestStep.getTeststrategy().equalsIgnoreCase(keptnEventFinished.getTeststrategy())).forEach(step->{
+                neoLoadTestStepList.stream().filter(neoLoadTestStep -> neoLoadTestStep.getTeststrategy().equalsIgnoreCase(keptnEventFinished.getStrategy())).forEach(step->{
                     logger.debug("Clonning repo :"+step.getScript().getRepository());
 
                     try {
