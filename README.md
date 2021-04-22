@@ -50,6 +50,7 @@ workloads:
 - teststrategy: performance
   script:
     repository: https://github.com/yourREPO.git
+     isSecured: true
     project:
     - path: /test/cart_basic.yaml
     - path: /test/load_template/load_template.nlp

@@ -9,12 +9,26 @@ import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.DEFAULT_BR
 public class TestingScript {
     String branch;
     String repository;
+    Boolean isSecured;
     List<Project> project;
 
-    public TestingScript(String branch, String repository, List<Project> project) {
+    public TestingScript(String branch, String repository,Boolean isSecured, List<Project> project) {
         this.branch = branch;
         this.repository = repository;
         this.project = project;
+
+        if(isSecured == null)
+            this.isSecured=false;
+        else
+            this.isSecured=isSecured;
+    }
+
+    public Boolean isSecured() {
+        return isSecured;
+    }
+
+    public void setSecured(Boolean secured) {
+        isSecured = secured;
     }
 
     public TestingScript() {
@@ -52,6 +66,7 @@ public class TestingScript {
     public String toString() {
         return "TestingScript{" +
                 "repository='" + repository + '\'' +
+                ",issecured="+isSecured().toString() +
                 ",branch='"+ getBranch() +"\'"+
                 ", project=" + "[" +project.stream().map(project1 -> {return project1.toString();}).collect(Collectors.joining(",")) +"]"+
                 '}';

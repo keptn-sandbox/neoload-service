@@ -27,35 +27,13 @@ spec:
               memory: "1Gi"
               cpu: "500m"
           env:
-          - name: logging-level
-            value: DEBUG
-          - name: KEPTN_NAMESPACE
-            value: NAMESPACE_TO_REPLACE
-          - name: NL_WEB_HOST
-            valueFrom:
-              secretKeyRef:
+            - name: logging-level
+              value: DEBUG
+          envFrom:
+            - configMapRef:
+                name: neoload-config
+            - secretKeyRef:
                 name: neoload
-                key: NL_WEB_HOST
-          - name: NL_API_HOST
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_API_HOST
-          - name: NL_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_API_TOKEN
-          - name: NL_WEB_ZONEID
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_WEB_ZONEID
-          - name: NL_UPLOAD_HOST
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_UPLOAD_HOST
           imagePullPolicy: Always
 ---
 apiVersion: v1

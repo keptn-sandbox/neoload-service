@@ -29,43 +29,16 @@ spec:
           env:
           - name: logging-level
             value: DEBUG
-          - name: KEPTN_NAMESPACE
-            value: NAMESPACE_TO_REPLACE
-          - name: NL_WEB_HOST
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_WEB_HOST
-          - name: NL_API_HOST
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_API_HOST
-          - name: NL_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_API_TOKEN
-          - name: NL_WEB_ZONEID
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_WEB_ZONEID
-          - name: NL_UPLOAD_HOST
-            valueFrom:
-              secretKeyRef:
-                name: neoload
-                key: NL_UPLOAD_HOST
           - name: DT_API_TOKEN
             valueFrom:
               secretKeyRef:
                 name: dynatrace
                 key: DT_API_TOKEN
-          - name: DT_TENANT
-            valueFrom:
-              secretKeyRef:
-                name: dynatrace
-                key: DT_TENANT
+          envFrom:
+          - configMapRef:
+              name: neoload-config
+          - secretKeyRef:
+              name: neoload
           imagePullPolicy: Always
 ---
 apiVersion: v1

@@ -28,6 +28,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -499,7 +500,7 @@ public class NeoLoadHandler {
                     logger.debug("Clonning repo :"+step.getScript().getRepository());
 
                     try {
-                        gitfolder=getNeoLoadTestFolder(getGitHubFolder(step.getScript().getRepository()),step.getScript().getBranch());
+                        gitfolder=getNeoLoadTestFolder(getGitHubFolder(step.getScript().getRepository()),step.getScript().getBranch(),step.getScript().isSecured());
                     } catch (IOException e) {
                         error.append("Technical Error while retrieveing repository "+e.getMessage());
                     } catch (NeoLoadJgitExeption neoLoadJgitExeption) {
@@ -532,38 +533,52 @@ public class NeoLoadHandler {
 
 
 
-    private Path getNeoLoadTestFolder(String ressource,String branch)
+    private Path getNeoLoadTestFolder(String ressource, String branch, Boolean secured)
     {
         try {
+             Optional<String> scm_user;
+             Optional<String> scm_password;
+             scm_user= Optional.ofNullable(System.getenv(SECRET_SCM_USER));
+             scm_password=Optional.ofNullable(System.getenv(SECRET_SCM_PASSWORD));
+             Path localPath = Files.createTempDirectory("Gitfolder_" + keptncontext);
+             logger.debug("getNeoLoadTestFolder - local directory created "+localPath);
 
-
-            Path localPath = Files.createTempDirectory("Gitfolder_" + keptncontext);
-            logger.debug("getNeoLoadTestFolder - local directory created "+localPath);
-
-            if(keptnEventFinished!=null) {
+             if(keptnEventFinished!=null) {
                 logger.debug("getNeoLoadTestFolder - start clonning repo  "+getGitHubFolder(ressource));
 
-                Git result = Git.cloneRepository()
-                        .setURI(getGitHubFolder(ressource))
-                        .setDirectory(localPath.toFile())
-                        .setBranch(branch)
-                        .call();
-
-
-
+                 Git result;
+                 if(secured) {
+                     if (scm_user.isPresent() && !scm_user.get().isEmpty() && scm_password.isPresent() && scm_password.get().isEmpty()) {
+                         logger.debug("Clone the repo without using credentials");
+                         result = Git.cloneRepository()
+                                 .setURI(getGitHubFolder(ressource))
+                                 .setDirectory(localPath.toFile())
+                                 .setCredentialsProvider(new UsernamePasswordCredentialsProvider(scm_user.get(), scm_password.get()))
+                                 .setBranch(branch)
+                                 .call();
+                     } else {
+                         throw new NeoLoadJgitExeption("Impossible to clone the repo - Secure repository - There is no SCM credentials in the NeoLaod Secret");
+                     }
+                 }
+                else
+                {
+                    logger.debug("Clone the repo without using no credentials");
+                    result = Git.cloneRepository()
+                            .setURI(getGitHubFolder(ressource))
+                            .setDirectory(localPath.toFile())
+                            .setBranch(branch)
+                            .call();
+                }
                 logger.debug("getNeoLoadTestFolder - end clonning repo  "+getGitHubFolder(ressource));
-
-
-
 
                 // Note: the call() returns an opened repository already which needs to be closed to avoid file handle leaks!
                 logger.info("Having repository: " + result.getRepository().getDirectory());
                 return localPath;
-            }
-            else
-            {
+             }
+             else
+             {
                 throw new NeoLoadJgitExeption("THe event data has not been converted");
-            }
+             }
             } catch (IOException e) {
             logger.error("error on getNeoLoadTestFolder",e);
         } catch (InvalidRemoteException e) {

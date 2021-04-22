@@ -36,6 +36,10 @@ public class NeoLoadConfiguration {
     public static final String SECRET_DT_TENANT="DT_TENANT";
     public static final String SECRET_KEPTN_NAMESPACE="KEPTN_NAMESPACE";
 
+    public static final String SECRET_SCM_USER="SCM_USER";
+    public static final String SECRET_SCM_PASSWORD="SCM_PASSWORD";
+
+
     public static final String SECRET_NL_CONTROLLER_DCK_IMMAGE="NL_DOCKER_CTL_IMAGE";
     public static final String SECRET_NL_LG_DCK_IMMAGE="NL_DOCKER_LG_IMAGE";
 
