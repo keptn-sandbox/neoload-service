@@ -38,7 +38,7 @@ spec:
           envFrom:
           - configMapRef:
               name: neoload-config
-          - secretKeyRef:
+          - secretRef:
               name: neoload
           imagePullPolicy: Always
 ---
