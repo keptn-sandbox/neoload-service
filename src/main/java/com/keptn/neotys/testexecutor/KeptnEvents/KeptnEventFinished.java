@@ -88,37 +88,48 @@ public class KeptnEventFinished {
     private String start;
     private static final String KEY_start="start";
 
+    private static final String KEY_gitCommit="gitCommit";
     private String end;
     private static final String KEY_end="end";
 
 
     private Keptndeployment keptndeployment;
 
-    public KeptnEventFinished(JsonObject object)
+    public KeptnEventFinished(JsonObject object) throws   Exception
     {
-
 
         if(object.getValue(KEY_project) instanceof  String)
             project=object.getString(KEY_project);
 
-        if(object.getValue(KEY_deployment) instanceof JsonObject) {
-            deployment = object.getJsonObject(KEY_deployment);
-            Gson gson=new GsonBuilder().create();
-            keptndeployment=gson.fromJson(deployment.toString(),Keptndeployment.class);
+        System.out.println("Project " + project);
 
+        if(object.containsKey(KEY_deployment))
+        {
+            if (object.getValue(KEY_deployment) instanceof JsonObject) {
+                System.out.println("Found deplopyment");
+                deployment = object.getJsonObject(KEY_deployment);
+                Gson gson = new GsonBuilder().create();
+                System.out.println("Converting pobject "+deployment.toString());
+                keptndeployment = gson.fromJson(deployment.toString(), Keptndeployment.class);
+                System.out.println("oject converted");
+
+            }
         }
 
 
         if(object.getValue(KEY_service) instanceof String)
             service=object.getString(KEY_service);
+        System.out.println("serbice " + service);
 
 
         if(object.getValue(KEY_stage) instanceof String)
             stage=object.getString(KEY_stage);
 
-        if(object.getValue(KEY_message) instanceof String)
-            message=object.getString(KEY_message);
-
+        System.out.println("stage " + stage);
+        if(object.containsKey(KEY_message)) {
+            if (object.getValue(KEY_message) instanceof String)
+                message = object.getString(KEY_message);
+        }
         if(object.getValue(KEY_status) instanceof String)
             status=object.getString(KEY_status);
 
@@ -126,10 +137,21 @@ public class KeptnEventFinished {
             result=object.getString(KEY_result);
 
         if(object.getValue(KEY_test) instanceof JsonObject) {
+            System.out.println("Getting the testing object");
             test = object.getJsonObject(KEY_test);
+
             if((test.containsKey(KEY_teststrategy)&& test.getValue(KEY_teststrategy) instanceof String))
                 teststrategy=test.getString(KEY_teststrategy);
 
+        }
+
+        if(object.containsKey(KEY_label))
+        {
+            if(object.getValue(KEY_label) instanceof JsonObject)
+            {
+                System.out.println("The event has labels fields");
+                label=object.getJsonObject(KEY_label);
+            }
         }
 
         getOtherData(object);
@@ -147,6 +169,7 @@ public class KeptnEventFinished {
 
     private void getOtherData(JsonObject object)
     {
+        System.out.println("Getting other data");
         otherdata=new HashMap<String,Object>();
 
         object.forEach(
@@ -301,8 +324,7 @@ public class KeptnEventFinished {
     public void setEnd(long end) {
         this.end = convertDateLongToString(end);
     }
-
-    public JsonObject toJsonObject()
+    public JsonObject toJsonEndObject()
     {
         JsonObject jsonObject=new JsonObject();
         jsonObject.put(KEY_stage,stage);
@@ -328,17 +350,74 @@ public class KeptnEventFinished {
         if(end!=null)
             test.put(KEY_end,end);
 
+        if(deployment.containsKey(KEY_gitCommit))
+        {
+            test.put(KEY_gitCommit,deployment.getValue(KEY_gitCommit));
+        }
+
         if(neoloaddata.size()>0)
         {
-            label=new JsonObject();
+            if(label == null)
+                label=new JsonObject();
+
             neoloaddata.forEach((s, s2) -> {
                 label.put(s,s2);
             });
             jsonObject.put(KEY_label, label);
 
         }
-        jsonObject.put(KEY_deployment,deployment);
+        if(test.containsKey(KEY_teststrategy))
+            test.remove(KEY_teststrategy);
+
         jsonObject.put(KEY_test,test);
+
+
+        return jsonObject;
+    }
+    public JsonObject toStartJsonObject()
+    {
+        JsonObject jsonObject=new JsonObject();
+        jsonObject.put(KEY_stage,stage);
+        jsonObject.put(KEY_service,service);
+        jsonObject.put(KEY_project,project);
+        jsonObject.put(KEY_status,status);
+        jsonObject.put(KEY_result,result);
+        jsonObject.put(KEY_message,message);
+
+        HashMap<String,String> neoloaddata=new HashMap<>();
+
+        if(testid!=null)
+            neoloaddata.put(KEY_testid,testid);
+        if(neoloadURL!=null)
+            neoloaddata.put(KEY_nlurl,neoloadURL);
+
+        if(teststatus!=null)
+            neoloaddata.put(KEY_nlstatus,teststatus);
+
+        if(start!=null)
+            test.put(KEY_start,start);
+
+        if(end!=null)
+            test.put(KEY_end,end);
+
+
+
+
+            if(neoloaddata.size()>0) {
+                if(label ==null)
+                    label=new JsonObject();
+
+                neoloaddata.forEach((s, s2) -> {
+                    label.put(s, s2);
+                });
+            }
+
+            if(label!=null)
+                jsonObject.put(KEY_label, label);
+
+
+       // jsonObject.put(KEY_deployment,deployment);
+       // jsonObject.put(KEY_test,test);
 
 
         return jsonObject;
@@ -347,7 +426,7 @@ public class KeptnEventFinished {
     public String toString()
     {
 
-        return toJsonObject().toString();
+        return toStartJsonObject().toString();
 
     }
 }

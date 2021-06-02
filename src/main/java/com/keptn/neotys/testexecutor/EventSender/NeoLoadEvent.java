@@ -15,8 +15,7 @@ import io.vertx.reactivex.core.http.HttpClientRequest;
 
 import java.net.URI;
 
-import static com.keptn.neotys.testexecutor.KeptnEvents.EventType.KEPTN_TEST_FINISHED;
-import static com.keptn.neotys.testexecutor.KeptnEvents.EventType.KEPTN_TEST_STARTED;
+import static com.keptn.neotys.testexecutor.KeptnEvents.EventType.*;
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
 
 
@@ -25,6 +24,7 @@ public class NeoLoadEvent {
     String eventid;
     KeptnLogger logger;
     Vertx vertx;
+    String keptnApiToken;
 
     private final static String CONTENTYPE="application/json";
     private final static String CONTENTYPE_CLOUD=" application/cloudevents+json";
@@ -32,6 +32,7 @@ public class NeoLoadEvent {
         this.eventid=enventid;
         logger=log;
         vertx=rxvertx;
+        keptnApiToken=System.getenv(SECRET_KEPTN_API_TOKEN);
     }
 
     //{
@@ -60,7 +61,7 @@ public class NeoLoadEvent {
             logger.debug("endevent : Start sending event");
             final HttpClientRequest request = vertx.createHttpClient().post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+KEPTN_EVENT_URL);
 
-            logger.debug("endevent : Defining cloud envet with data:" + data.toJsonObject().toString());
+            logger.debug("endevent : Defining cloud envet with data:" + data.toJsonEndObject().toString());
 
             logger.debug("endevnet specversion : "+receivedEvent.getSpecVersion()+" : source : "+URI.create(NEOLOAD_SOURCE).toString()+ " id :"+this.eventid);
             String id;
@@ -71,16 +72,13 @@ public class NeoLoadEvent {
 
             WebClient client=WebClient.create(vertx);
 
-            HttpRequest<Buffer> httpRequest=client.post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+KEPTN_EVENT_URL);
+            HttpRequest<Buffer> httpRequest=client.post(CONFIGURAITON_PORT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+CONFIGURATION_VERSION+"/"+KEPTN_EVENT_URL);
 
             httpRequest.putHeader(CONTENT_TYPE,CONTENTYPE_CLOUD);
-            String contentype;
-           /* if(receivedEvent.getContentType().isPresent())
-                contentype=receivedEvent.getContentType().get();
-            else
-                contentype=CONTENTYPE;*/
-          // contentype=CONTENTYPE_CLOUD;
-            CloudTestEvent cloudTestEvent =new CloudTestEvent(KEPTN_TEST_FINISHED,CONTENTYPE,extensions.getShkeptncontext(),receivedEvent.getSpecVersion(),NEOLOAD_SOURCE,id,extensions.getTriggeredid(),extensions.getShkeptnspecversion(),data.toJsonObject());
+            httpRequest.putHeader(HEADER_KEPTN_TOKEN,keptnApiToken);
+
+
+            CloudTestEvent cloudTestEvent =new CloudTestEvent(KEPTN_TEST_FINISHED,CONTENTYPE,extensions.getShkeptncontext(),receivedEvent.getSpecVersion(),NEOLOAD_SOURCE,id,extensions.getTriggeredid(),extensions.getShkeptnspecversion(),data.toJsonEndObject());
             httpRequest.sendJson(cloudTestEvent.toJson(), httpResponseAsyncResult -> {
                 if(httpResponseAsyncResult.succeeded())
                 {
@@ -93,26 +91,7 @@ public class NeoLoadEvent {
             });
             logger.info("Request sent " + cloudTestEvent.toJson().toString() );
 
-            /*CloudEvent<JsonObject> cloudEvent = new CloudEventBuilder<JsonObject>()
-                    .type(KEPTN_TEST_FINISHED)
-                    .id(id)
-                    .source(URI.create(NEOLOAD_SOURCE))
-                    .time(ZonedDateTime.now(ZoneOffset.UTC))
-                    .data(data.toJsonObject())
-                    .extension(extensions)
-                    .specVersion(receivedEvent.getSpecVersion())
-                    .contentType(CONTENTYPE)
-                    .build();
 
-            request.handler(resp -> {
-                logger.info("endevent : received response code "+String.valueOf(resp.statusCode())+ " message "+ resp.statusMessage());
-
-            });
-
-
-            //VertxCloudEvents.create().writeToHttpClientRequest(cloudEvent, false,request);
-            logger.debug("endevent : request write");
-            */
 
         }
         catch(Exception e)
@@ -124,12 +103,64 @@ public class NeoLoadEvent {
             if(receivedEvent.getSpecVersion()==null)
                 logger.debug("Specversion null");
 
-            if(data.toJsonObject() ==null)
+            if(data.toStartJsonObject() ==null)
                 logger.debug("data null");
 
         }
     }
+    public void changeevent(KeptnEventFinished data, KeptnExtensions extensions, CloudEvent<Object> receivedEvent, String keptn_namespace)
+    {
+        try {
+            logger.debug("changeevent : Start sending event");
+            final HttpClientRequest request = vertx.createHttpClient().post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+KEPTN_EVENT_URL);
 
+            logger.debug("changeevent : Defining cloud envet with data:" + data.toStartJsonObject().toString());
+
+            logger.debug("changeevent specversion : "+receivedEvent.getSpecVersion()+" : source : "+URI.create(NEOLOAD_SOURCE).toString()+ " id :"+this.eventid);
+            String id;
+            if(receivedEvent.getId()==null)
+                id=extensions.getShkeptncontext();
+            else
+                id=receivedEvent.getId();
+
+            WebClient client=WebClient.create(vertx);
+
+            HttpRequest<Buffer> httpRequest=client.post(CONFIGURAITON_PORT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+CONFIGURATION_VERSION+"/"+KEPTN_EVENT_URL);
+
+            httpRequest.putHeader(CONTENT_TYPE,CONTENTYPE_CLOUD);
+            httpRequest.putHeader(HEADER_KEPTN_TOKEN,keptnApiToken);
+
+
+            CloudTestEvent cloudTestEvent =new CloudTestEvent(KEPTN_TEST_STARTING,CONTENTYPE,extensions.getShkeptncontext(),receivedEvent.getSpecVersion(),NEOLOAD_SOURCE,id,extensions.getTriggeredid(),extensions.getShkeptnspecversion(),data.toJsonEndObject());
+            httpRequest.sendJson(cloudTestEvent.toJson(), httpResponseAsyncResult -> {
+                if(httpResponseAsyncResult.succeeded())
+                {
+                    logger.info("changeevent : received response code "+String.valueOf(httpResponseAsyncResult.result().statusCode())+ " message "+ httpResponseAsyncResult.result().statusMessage());
+                }
+                else
+                {
+                    logger.error("ERROR changeevent : received response code "+String.valueOf(httpResponseAsyncResult.result().statusCode())+ " message "+ httpResponseAsyncResult.result().statusMessage());
+                }
+            });
+            logger.info("Request sent " + cloudTestEvent.toJson().toString() );
+
+
+
+        }
+        catch(Exception e)
+        {
+            logger.error("changeevent  generate exception",e);
+            if(extensions.getShkeptncontext()==null)
+                logger.debug("keptn context null");
+
+            if(receivedEvent.getSpecVersion()==null)
+                logger.debug("Specversion null");
+
+            if(data.toStartJsonObject() ==null)
+                logger.debug("data null");
+
+        }
+    }
 
     //{
     //  "data": {
@@ -156,7 +187,7 @@ public class NeoLoadEvent {
             logger.debug("started : Start sending event");
             final HttpClientRequest request = vertx.createHttpClient().post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+KEPTN_EVENT_URL);
 
-            logger.debug("started : Defining cloud envet with data:" + keptnEventFinished.toJsonObject().toString());
+            logger.debug("started : Defining cloud envet with data:" + keptnEventFinished.toStartJsonObject().toString());
 
             logger.debug("started specversion : "+receivedEvent.getSpecVersion()+" : source : "+URI.create(NEOLOAD_SOURCE).toString()+ " id :"+this.eventid);
             String id;
@@ -167,17 +198,15 @@ public class NeoLoadEvent {
 
             WebClient client=WebClient.create(vertx);
 
-            HttpRequest<Buffer> httpRequest=client.post(KEPTN_PORT_EVENT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+KEPTN_EVENT_URL);
+            HttpRequest<Buffer> httpRequest=client.post(CONFIGURAITON_PORT, KEPTN_EVENT_HOST+keptn_namespace+KEPTN_END_URL, "/"+CONFIGURATION_VERSION+"/"+KEPTN_EVENT_URL);
 
             httpRequest.putHeader(CONTENT_TYPE,CONTENTYPE_CLOUD);
-            String contentype;
-           /* if(receivedEvent.getContentType().isPresent())
-                contentype=receivedEvent.getContentType().get();
-            else
-                contentype=CONTENTYPE;*/
-            // contentype=CONTENTYPE_CLOUD;
+            httpRequest.putHeader(HEADER_KEPTN_TOKEN,keptnApiToken);
 
-            CloudTestEvent cloudTestEvent =new CloudTestEvent(KEPTN_TEST_STARTED,CONTENTYPE,extensions.getShkeptncontext(),receivedEvent.getSpecVersion(),NEOLOAD_SOURCE,id,extensions.getTriggeredid(),extensions.getShkeptnspecversion(),keptnEventFinished.toJsonObject());
+            String contentype;
+
+            CloudTestEvent cloudTestEvent =new CloudTestEvent(KEPTN_TEST_STARTED,CONTENTYPE,extensions.getShkeptncontext(),receivedEvent.getSpecVersion(),NEOLOAD_SOURCE,id,extensions.getTriggeredid(),extensions.getShkeptnspecversion(),keptnEventFinished.toStartJsonObject());
+            logger.debug("Sending cloud event to Keptn with payload "+ cloudTestEvent.toJson().toString());
             httpRequest.sendJson(cloudTestEvent.toJson(), httpResponseAsyncResult -> {
                 if(httpResponseAsyncResult.succeeded())
                 {
@@ -190,26 +219,7 @@ public class NeoLoadEvent {
             });
             logger.info("Request sent " + cloudTestEvent.toJson().toString() );
 
-            /*CloudEvent<JsonObject> cloudEvent = new CloudEventBuilder<JsonObject>()
-                    .type(KEPTN_TEST_FINISHED)
-                    .id(id)
-                    .source(URI.create(NEOLOAD_SOURCE))
-                    .time(ZonedDateTime.now(ZoneOffset.UTC))
-                    .data(data.toJsonObject())
-                    .extension(extensions)
-                    .specVersion(receivedEvent.getSpecVersion())
-                    .contentType(CONTENTYPE)
-                    .build();
 
-            request.handler(resp -> {
-                logger.info("endevent : received response code "+String.valueOf(resp.statusCode())+ " message "+ resp.statusMessage());
-
-            });
-
-
-            //VertxCloudEvents.create().writeToHttpClientRequest(cloudEvent, false,request);
-            logger.debug("endevent : request write");
-            */
 
         }
         catch(Exception e)
@@ -221,7 +231,7 @@ public class NeoLoadEvent {
             if(receivedEvent.getSpecVersion()==null)
                 logger.debug("Specversion null");
 
-            if(keptnEventFinished.toJsonObject() ==null)
+            if(keptnEventFinished.toStartJsonObject() ==null)
                 logger.debug("data null");
 
         }

@@ -38,7 +38,7 @@ public class CloudTestEvent {
     private static final String KEY_type="type";
 
     private String contenttype;
-    private static final String KEY_contenttype="contenttype";
+    private static final String KEY_contenttype="datacontenttype";
 
     private String shkeptncontext;
     private static final String KEY_shkeptncontext="shkeptncontext";
@@ -78,7 +78,7 @@ public class CloudTestEvent {
         this.source = source;
         this.id = id;
         this.data = data;
-        this.triggeredid=triggeredid;
+        this.triggeredid=id;
         this.shkeptnspecversion=shkeptnspecversion;
     }
 
@@ -174,8 +174,10 @@ public class CloudTestEvent {
         result.put(KEY_specversion,specversion);
         result.put(KEY_time,time);
         result.put(KEY_type,type);
-        result.put(KEY_shkeptnspecversion,shkeptnspecversion);
-        result.put(KEY_triggeredid,triggeredid);
+        if(shkeptnspecversion!=null)
+            result.put(KEY_shkeptnspecversion,shkeptnspecversion);
+        if(triggeredid!=null)
+            result.put(KEY_triggeredid,triggeredid);
 
         return result;
     }

@@ -1,5 +1,9 @@
 package com.keptn.neotys.testexecutor.messageHandler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.keptn.neotys.testexecutor.EventSender.NeoLoadEvent;
 import com.keptn.neotys.testexecutor.KeptnEvents.KeptnEventFinished;
 import com.keptn.neotys.testexecutor.NeoLoadFolder.ProjectSettings;
@@ -21,6 +25,8 @@ import com.neotys.ascode.swagger.client.model.ProjectDefinition;
 import com.neotys.ascode.swagger.client.model.RunTestDefinition;
 import com.neotys.ascode.swagger.client.model.TestDefinition;
 import io.cloudevents.CloudEvent;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Future;
 import io.vertx.reactivex.core.Vertx;
 import org.apache.commons.io.FileUtils;
@@ -31,10 +37,7 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -74,7 +77,7 @@ public class NeoLoadHandler {
 
     private Future<List<NeoLoadTestStep>> getRessources(Vertx vertx) throws NeoLoadSerialException, NeoLoadJgitExeption {
         ConfigurationApi configurationApi=new ConfigurationApi(logger,vertx,keptnEventFinished.getProject(),keptnEventFinished.getStage(),keptnEventFinished.getService());
-        Future<KeptnRessource> keptnRessource=configurationApi.getRessource(NEOLOAD_CONFIG_FILE);
+        Future<KeptnRessource> keptnRessource=configurationApi.getRessource(NEOLOAD_CONFIG_FILE,NEOLOAD_CONFIG_FILE_OPTION2);
         Future<List<NeoLoadTestStep>> listFuture=Future.future();
 
         keptnRessource.setHandler(result->{
@@ -99,6 +102,7 @@ public class NeoLoadHandler {
                 listFuture.complete(neoLoadDataModel.getWorkloads());
             } else {
                 logger.error("No Ressrouce " + NEOLOAD_CONFIG_FILE + " found for project " + keptnEventFinished.getProject() + " and stage " + keptnEventFinished.getStage());
+                logger.info("trying to  " + NEOLOAD_CONFIG_FILE + " found for project " + keptnEventFinished.getProject() + " and stage " + keptnEventFinished.getStage());
                 listFuture.fail(new NeoLoadJgitExeption("No Ressrouce " + NEOLOAD_CONFIG_FILE + " found for project " + keptnEventFinished.getProject() + " and stage " + keptnEventFinished.getStage()));
 
             }
@@ -164,7 +168,91 @@ public class NeoLoadHandler {
         }
 
     }
+    private File updateNeoLoadAsCodeFile(File path) throws NeoLoadSerialException {
+        try
+        {
+            Yaml yaml = new Yaml();
+            FileInputStream input= new FileInputStream(path);
 
+            Map<String, Object> nlascodeObj = yaml.load(input);
+            JsonObject jsonObject= JsonObject.mapFrom(nlascodeObj);
+
+
+            if(jsonObject.containsKey("scenarios"))
+            {
+
+
+                JsonArray jsonArray=jsonObject.getJsonArray("scenarios");
+
+                List<JsonObject> scenarioList=jsonArray.stream().map(o -> {
+                            if(o instanceof JsonObject)
+                            {
+                                JsonObject scenario=(JsonObject) o ;
+                                logger.debug("Class properly converted");
+                                //--- update the apm settings---
+                                JsonArray keptn=new JsonArray();
+                                keptn.add(KEPTN_TAG_PROJECT+this.keptnEventFinished.getProject());
+                                keptn.add(KEPTN_TAG_STAGE+this.keptnEventFinished.getStage());
+                                keptn.add(KEPTN_TAG_SERVICE+this.keptnEventFinished.getService());
+
+                                if( scenario.containsKey("apm_configuration"))
+                                {
+                                    JsonObject apmconfiguration=scenario.getJsonObject("apm_configuration");
+                                    if(apmconfiguration.containsKey("dynatrace_tags"))
+                                    {
+                                        apmconfiguration.remove("dynatrace_tags");
+                                        apmconfiguration.put("dynatrace_tags",keptn);
+                                    } else
+                                        apmconfiguration.put("dynatrace_tags",keptn);
+                                }
+                                else
+                                {
+                                    JsonObject apmconfiguration=new JsonObject();
+                                    apmconfiguration.put("dynatrace_tags",keptn);
+                                    scenario.put("apm_configuration",apmconfiguration);
+                                }
+                                return scenario;
+                            }
+                            else
+                            {
+                                Scenario scenario = (Scenario) o;
+                                logger.debug("TEst cast of scenario "+ scenario.getName());
+                                logger.error("Unable to cast object");
+                                return null;
+                            }
+                }).filter(scenario -> scenario!=null).collect(Collectors.toList());
+                JsonArray scenaraary=new JsonArray();
+                scenarioList.stream().forEach(entries -> scenaraary.add(entries));
+                jsonObject.remove("scenarios");
+                jsonObject.put("scenarios",scenaraary);
+                logger.debug("Modified Json "+ jsonObject.toString());
+                String newYaml= asYaml(jsonObject.toString());
+                FileWriter fileWriter=new FileWriter(path);
+                fileWriter.write(newYaml);
+                fileWriter.close();
+                logger.debug("YAML : "+newYaml);
+                return path;
+            }
+            else
+            {
+                return path;
+            }
+
+        } catch (FileNotFoundException e) {
+            logger.error("Yaml as code file not found",e);
+            throw new NeoLoadSerialException("Yaml as code file not found "+e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public String asYaml(String jsonString) throws JsonProcessingException, IOException {
+        // parse JSON
+        JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonString);
+        // save it as YAML
+        String jsonAsYaml = new YAMLMapper().writeValueAsString(jsonNodeTree);
+        return jsonAsYaml;
+    }
     private String getAsCodeFiles(List<Project> projectPath)
     {
         List<String> projectwithoutnlp=projectPath.stream().map(pro->{return pro.getPath();}).filter(file->!file.toLowerCase().contains(NLP_EXTENSION)).collect(Collectors.toList());
@@ -196,9 +284,18 @@ public class NeoLoadHandler {
             try {
                 logger.debug("Yaml file :  "+gitfolder.toAbsolutePath().toString()+file+" has been added in the zip");
                 logYamlFile(gitfolder.toAbsolutePath().toString()+file);
-                FileUtils.copyFileToDirectory(new File(gitfolder.toAbsolutePath().toString()+file),path.toFile());
+                if(dynatraceTenant.isPresent() && dynatraceToken.isPresent())
+                {
+                    //---if dynatrace integration then add the keptn tags
+                    File transformedfile=updateNeoLoadAsCodeFile(new File(gitfolder.toAbsolutePath().toString()+file));
+                    logger.debug("neoload as code file modified :");
+                    logYamlFile(transformedfile.getAbsolutePath());
+                    FileUtils.copyFileToDirectory(transformedfile,path.toFile());
+                }
+                else
+                    FileUtils.copyFileToDirectory(new File(gitfolder.toAbsolutePath().toString()+file),path.toFile());
 
-            } catch (IOException e) {
+            } catch (IOException | NeoLoadSerialException e) {
                 error.add(e);
             }
         });
@@ -243,7 +340,7 @@ public class NeoLoadHandler {
                 tempfile=Optional.of(path.toAbsolutePath().toString()+"/"+keptnEventFinished.getService()+"."+keptncontext+YAML_EXTENSION);
                 try {
                     yaml.dump(model, new FileWriter(tempfile.get()));
-                    logger.debug("Constant yaml file created : " + tempfile.get());
+                    logger.debug("Settings yaml file created : " + tempfile.get());
                     logYamlFile(tempfile.get());
                 }
                 catch (IOException e)
@@ -263,7 +360,7 @@ public class NeoLoadHandler {
         return compressNLProject(path.toAbsolutePath().toString(),projectName+keptnEventFinished.getService());
 
     }
-    private NeoLoadWebTest RunTest(File zipfile, NeoLoadTestStep test, Optional<String> nlapi, Optional<String> nlapitoken, Optional<String> nlurl, Optional<String> uploadurl, Optional<String> nlzoneid, int size, NeoLoadEvent neoLoadEvent, CloudEvent<Object> receivedEvent, String keptn_namespace) throws ApiException, NeoLoadJgitExeption {
+    private KeptnEventFinished RunTest(File zipfile, NeoLoadTestStep test, Optional<String> nlapi, Optional<String> nlapitoken, Optional<String> nlurl, Optional<String> uploadurl, Optional<String> nlzoneid, int size, NeoLoadEvent neoLoadEvent, CloudEvent<Object> receivedEvent, String keptn_namespace) throws ApiException, NeoLoadJgitExeption {
        if(!nlapi.isPresent())
            throw new NeoLoadJgitExeption("No API URL Defined. installtion of the neoload service has not been configured properly");
 
@@ -310,7 +407,7 @@ public class NeoLoadHandler {
             ///---send the test started event----
             keptnEventFinished.setMessage("Test started : "+neoLoadWebTest.getTesturl());
             keptnEventFinished.setStatus("succeeded");
-            keptnEventFinished.setResult("Test Started");
+            keptnEventFinished.setResult("pass");
             neoLoadEvent.sendTestStarted(keptnEventFinished,extensions,receivedEvent,keptn_namespace);
 
 
@@ -323,19 +420,24 @@ public class NeoLoadHandler {
             if (teststatus.equalsIgnoreCase(TEST_STATUS_FAIL))
             {
                 logger.info("Test has FAILED");
-            } else
+            } else {
                 logger.info("Test has finished with sucess");
+            }
 
             keptnEventFinished.setTeststatus(teststatus);
-
             ResultsApi resultsApi=new ResultsApi(nlWebApiClient);
             TestDefinition testdefinition=resultsApi.getTest(runTestDefinition.getTestId());
             keptnEventFinished.setStart(testdefinition.getStartDate());
             keptnEventFinished.setEnd(testdefinition.getEndDate());
+            keptnEventFinished.setTestid(testdefinition.getId());
+            keptnEventFinished.setNeoloadURL(neoLoadWebTest.getTesturl());
             keptnEventFinished.setMessage("Test Ended : "+neoLoadWebTest.getTesturl());
-            keptnEventFinished.setStatus(testdefinition.getStatus().getValue());
-            keptnEventFinished.setResult("Neoload test ended");
-            return neoLoadWebTest;
+            keptnEventFinished.setStatus("succeeded");
+            if(teststatus.equalsIgnoreCase("PASSED"))
+                keptnEventFinished.setResult("pass");
+            else
+                keptnEventFinished.setResult("fail");
+            return keptnEventFinished;
 
             }
             catch (ApiException e)
@@ -379,6 +481,8 @@ public class NeoLoadHandler {
     }
     private void runNLScenario(NeoLoadTestStep test, Vertx rxvertx, CloudEvent<Object> receivedEvent)
     {
+        NeoLoadEvent neoLoadEvent=new NeoLoadEvent(logger,eventid,rxvertx);
+
         final NeoLoadKubernetesClient neoLoadKubernetesClient=new NeoLoadKubernetesClient(keptncontext);
         int numberofInstances = 0;
         String zoneid = null;
@@ -428,7 +532,6 @@ public class NeoLoadHandler {
         }
         try
         {
-                NeoLoadEvent neoLoadEvent=new NeoLoadEvent(logger,eventid,rxvertx);
 
                 List<String> projectspath=test.getScript().getProject().stream().map(project -> project.getPath()).collect(Collectors.toList());
                 String zipfilepath=createZipFile(projectspath, keptnEventFinished.getProject(),Optional.ofNullable(test.getProperties().getConstant_variables()),neoLoadKubernetesClient.getDynatrace_tenant(),neoLoadKubernetesClient.getDynatrace_api_token());
@@ -437,9 +540,8 @@ public class NeoLoadHandler {
 
 
                 //run the test
-                NeoLoadWebTest loadWebTest=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),Optional.ofNullable(zoneid),numberofInstances,neoLoadEvent,receivedEvent,neoLoadKubernetesClient.getKeptn_NAMESPACE());
-                keptnEventFinished.setTestid(loadWebTest.getTestid());
-                keptnEventFinished.setNeoloadURL(loadWebTest.getTesturl());
+                KeptnEventFinished keptnEventFinished=RunTest(new File(zipfilepath),test,neoLoadKubernetesClient.getNeoloadweb_apiurl(),Optional.ofNullable(neoLoadKubernetesClient.getNeoloadAPitoken()),neoLoadKubernetesClient.getNeoloadweb_url(),neoLoadKubernetesClient.getNeoloadweb_uploadurl(),Optional.ofNullable(zoneid),numberofInstances,neoLoadEvent,receivedEvent,neoLoadKubernetesClient.getKeptn_NAMESPACE());
+
                 ///--
                 neoLoadEvent.endevent(keptnEventFinished,extensions,receivedEvent,neoLoadKubernetesClient.getKeptn_NAMESPACE());
                 //--send end event-------------
@@ -448,10 +550,17 @@ public class NeoLoadHandler {
         }
         catch (ApiException | InterruptedException e) {
             logger.error("RUnNLScenario , api exception",e);
+            keptnEventFinished.setMessage("APIError when running scenario "+e.getMessage());
+            keptnEventFinished.setStatus("errored");
+            keptnEventFinished.setResult("fail");
+            neoLoadEvent.changeevent(keptnEventFinished,extensions,receivedEvent,neoLoadKubernetesClient.getKeptn_NAMESPACE());
         }catch (Exception e)
         {
             logger.error("Technical error ",e);
-
+            keptnEventFinished.setMessage("Technical Error when running scenario "+e.getMessage());
+            keptnEventFinished.setStatus("errored");
+            keptnEventFinished.setResult("fail");
+            neoLoadEvent.changeevent(keptnEventFinished,extensions,receivedEvent,neoLoadKubernetesClient.getKeptn_NAMESPACE());
         }
         finally {
             if(neoLoadKubernetesClient!=null)

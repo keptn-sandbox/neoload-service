@@ -17,7 +17,7 @@ spec:
       serviceAccountName: keptn-neoload-service
       containers:
         - name: neoload-service
-          image: neotyspartnersolution/keptn_neoload:latest
+          image: neotyspartnersolution/keptn_neoload:0.8.0
           ports:
             - containerPort: 8080
           resources:
@@ -35,6 +35,16 @@ spec:
               secretKeyRef:
                 name: dynatrace
                 key: DT_API_TOKEN
+          - name: DT_TENANT
+            valueFrom:
+              secretKeyRef:
+                name: dynatrace
+                key: DT_TENANT
+          - name: KP_API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: keptn-api-token
+                key: keptn-api-token
           envFrom:
           - configMapRef:
               name: neoload-config

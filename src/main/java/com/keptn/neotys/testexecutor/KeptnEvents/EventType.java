@@ -7,7 +7,7 @@ public  class EventType {
     public static final String KEPTN_DEPLOYMENT_FINISHED="sh.keptn.events.deployment-finished";
     public static final String KEPTN_TEST_STARTING="sh.keptn.event.test.triggered";
     public static final String KEPTN_TEST_STARTED="sh.keptn.event.test.started";
-    public static final String KEPTN_TEST_FINISHED="sh.keptn.events.tests-finished";
+    public static final String KEPTN_TEST_FINISHED="sh.keptn.event.test.finished";
     public static final String KEPTN_EVALUATION_DONE="sh.keptn.events.evaluation-done";
     public static final String KEPTN_EVENTS_PROBLEM="sh.keptn.events.problem";
 

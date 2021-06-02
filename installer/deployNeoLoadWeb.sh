@@ -55,7 +55,7 @@ echo "Deploying neoload-service $NL_SERVICE_RELEASE"
 if [ -z "$CONTROLLER" ]; then
       if [ -z "$LG" ]; then
            echo "Creating neoload configmap"
-        kubectl -n "$NAMESPACE" create configmap neoload-config --from-literal="NL_WEB_HOST=$NL_WEB_HOST" --from-literal="NL_API_HOST=$NL_API_HOST"  --from-literal="NL_WEB_ZONEID=$NL_WEB_ZONEID" --from-literal="NL_UPLOAD_HOST=$NL_UPLOAD_HOST"
+        kubectl -n "$NAMESPACE" create configmap neoload-config --from-literal="NL_WEB_HOST=$NL_WEB_HOST" --from-literal="NL_API_HOST=$NL_API_HOST"  --from-literal="NL_WEB_ZONEID=$NL_WEB_ZONEID" --from-literal="NL_UPLOAD_HOST=$NL_UPLOAD_HOST" --from-literal="KEPTN_NAMESPACE=$NAMESPACE"
       else
          echo "Controller image needs to be defined if the Loadgenerator image is specified"
          exit 0
@@ -66,7 +66,7 @@ else
      exit 0
   else
      echo "Creating neoload configmap with custom images"
-     kubectl -n "$NAMESPACE" create configmap neoload-config --from-literal="NL_WEB_HOST=$NL_WEB_HOST" --from-literal="NL_API_HOST=$NL_API_HOST"  --from-literal="NL_WEB_ZONEID=$NL_WEB_ZONEID" --from-literal="NL_UPLOAD_HOST=$NL_UPLOAD_HOST" --from-literal="NL_DOCKER_CTL_IMAGE=$CONTROLLER" --from-literal="NL_DOCKER_LG_IMAGE=$LG"
+     kubectl -n "$NAMESPACE" create configmap neoload-config --from-literal="NL_WEB_HOST=$NL_WEB_HOST" --from-literal="NL_API_HOST=$NL_API_HOST"  --from-literal="NL_WEB_ZONEID=$NL_WEB_ZONEID" --from-literal="NL_UPLOAD_HOST=$NL_UPLOAD_HOST" --from-literal="NL_DOCKER_CTL_IMAGE=$CONTROLLER" --from-literal="NL_DOCKER_LG_IMAGE=$LG" --from-literal="KEPTN_NAMESPACE=$NAMESPACE"
 
   fi
 fi

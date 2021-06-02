@@ -365,7 +365,6 @@ public class NeoLoadKubernetesClient {
             List<ContainerPort> containerPorts=new ArrayList<>();
             ContainerPort port=new ContainerPort();
             port.setContainerPort(7100);
-            port.setHostPort(7100);
             port.setProtocol("TCP");
             port.setName("nllg");
             containerPorts.add(port);
@@ -377,14 +376,12 @@ public class NeoLoadKubernetesClient {
             List<ContainerPort> containerPorts=new ArrayList<>();
             ContainerPort port=new ContainerPort();
             port.setContainerPort(7400);
-            port.setHostPort(7400);
             port.setProtocol("TCP");
             port.setName("nlapi");
 
             containerPorts.add(port);
             ContainerPort mon=new ContainerPort();
             mon.setContainerPort(7200);
-            mon.setHostPort(7200);
             mon.setProtocol("TCP");
             mon.setName("nlmon");
             containerPorts.add(mon);
@@ -392,14 +389,12 @@ public class NeoLoadKubernetesClient {
 
             ContainerPort ssl=new ContainerPort();
             ssl.setContainerPort(443);
-            ssl.setHostPort(443);
             ssl.setProtocol("TCP");
             ssl.setName("nlssl");
             containerPorts.add(ssl);
 
             ContainerPort poll=new ContainerPort();
             poll.setContainerPort(4569);
-            poll.setHostPort(4569);
             poll.setProtocol("TCP");
             poll.setName("nlpoll");
             containerPorts.add(poll);

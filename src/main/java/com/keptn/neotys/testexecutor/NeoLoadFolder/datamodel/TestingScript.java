@@ -24,7 +24,10 @@ public class TestingScript {
     }
 
     public Boolean isSecured() {
-        return isSecured;
+        if(isSecured==null)
+            return false;
+        else
+            return isSecured;
     }
 
     public void setSecured(Boolean secured) {

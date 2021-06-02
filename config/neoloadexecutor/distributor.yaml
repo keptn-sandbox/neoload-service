@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: neoload-service-deployment-finished-distributor
+  name: neoload-service-deployment-test-triggered
   namespace: NAMESPACE_TO_REPLACE
 spec:
   selector:

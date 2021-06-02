@@ -3,7 +3,7 @@
 This service is designed to use NeoLoad for executing various Load testing tasks. 
 
 To trigger a NeoLoad test, the service has subscriptions to event channels. In more details, the current implementation of the service listens to CloudEvents from type:
-* `sh.keptn.events.deployment-finished`: When receiving this event, the service executes a test for a deployed application. This event would be replace by the start test event
+* `sh.keptn.event.test.triggered`: When receiving this event, the service executes a test for a deployed application. This event would be replace by the start test event
 
 ## Secret for credentials
 During the setup of NeoLaod, a secret is created that contains key-value pairs for the NeoLoad  URL, NeoLoad apiKey:
@@ -31,15 +31,20 @@ you can also take advantage of the native dyntrace integration by running the de
  * there are 2 type of installation
    1. installing the neoload-service with dynatrace
    If the dynatrace-service has been previously installed then you can run:
-`installer/deployNeoLoadWebWithDynatrace.sh <name of you keptn namespace>`    
+`installer/deployNeoLoadWebWithDynatrace.sh <args>`    
     Once deployed the neoload-service will had the right project settings to run a test with the dynatrace integration.
     The Enduser will still need to configure the tags in each scenario.
     
     2. Installing the neoload-service
-`installer/deployNeoLoadWeb.sh <name of you keptn namespace>`    
+`installer/deployNeoLoadWeb.sh <Args>`    
     
     
-
+  * Here are the following parameters for the deployment bash scripts :
+   1.  -n : namespace name where Keptn is installed ( default value : keptn)
+   2.  -c : custom NeoLoad Controller image name ( by default keptn will pick the latest version)
+   3.  -l : custom NeoLoad LoadGenerator image name 
+   4.  -u : git login user ( if the git repository require authentification with user/password)
+   5.  -p : git password ( if the git repository require authentification with user/password)
     
 ## The NeoLoad Service requires to store the workload.yaml file in the ressources of keptn
 

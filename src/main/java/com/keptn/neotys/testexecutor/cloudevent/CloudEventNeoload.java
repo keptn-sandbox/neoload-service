@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.keptn.neotys.testexecutor.KeptnEvents.EventType.KEPTN_TEST_STARTING;
 import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.*;
@@ -24,7 +25,6 @@ import static java.lang.System.getenv;
 public class CloudEventNeoload extends AbstractVerticle {
 
 	KeptnLogger loger;
-
 	private  Vertx rxvertx;
     private List<String> lisofKeptnContext=new ArrayList<>();
 	public void start() {
@@ -52,35 +52,52 @@ public class CloudEventNeoload extends AbstractVerticle {
 								if (receivedEvent != null) {
 									// I got a CloudEvent object:
 									System.out.println("The event type: " + receivedEvent.getType());
+									System.out.println(req.headers().entries().stream().map(stringStringEntry -> stringStringEntry.getKey()).collect(Collectors.joining(",")));
+
 									if(receivedEvent.getType().equalsIgnoreCase(KEPTN_TEST_STARTING))
 									{
-
+										System.out.println("The event received: " + receivedEvent.toString());
 										if(receivedEvent.getData().isPresent())
 										{
 											Object obj=receivedEvent.getData().get();
 											try {
-												JsonObject data = new JsonObject((HashMap<String,Object>)obj);
+												JsonObject data = new JsonObject(obj.toString());
 												if (data instanceof JsonObject)
 												{
 													KeptnEventFinished eventFinished = new KeptnEventFinished(data);
 													KeptnExtensions keptnExtensions = null;
 													if (receivedEvent.getExtensions().isPresent() && receivedEvent.getExtensions().get().size() > 0) {
-
+														System.out.println("Extracting extensions from event");
 														keptnExtensions = (KeptnExtensions) receivedEvent.getExtensions().get().get(0);
+
 													}
 													else
 													{
+														System.out.println("Collecting keptn extension from headers");
 														Optional<String> kepncontext = Optional.ofNullable(req.getHeader(HEADER_KEPTNCONTEXT));
 														Optional<String> datacontent = Optional.ofNullable(req.getHeader(HEADER_datacontentype));
 														Optional<String> shkeptnspecversion=Optional.ofNullable(req.getHeader(HEADER_shkeptnspecversion));
 														Optional<String> triggeredid=Optional.ofNullable(req.getHeader(HEADER_triggeredid));
 														if(kepncontext.isPresent()&& datacontent.isPresent() && shkeptnspecversion.isPresent() && triggeredid.isPresent())
-															keptnExtensions=new KeptnExtensions(kepncontext.get(),datacontent.get(),shkeptnspecversion.get(),triggeredid.get());
+															keptnExtensions=new KeptnExtensions(kepncontext.get(),datacontent,triggeredid,shkeptnspecversion);
 													}
 
 													if(keptnExtensions!=null)
 													{
-														String keptncontext = keptnExtensions.getShkeptncontext();
+														String keptncontext;
+														keptncontext= keptnExtensions.getShkeptncontext();
+														if(keptncontext ==null)
+														{
+
+															keptncontext = Optional.ofNullable(req.getHeader(HEADER_KEPTNCONTEXT)).get();
+															System.out.println("Ketptn contecxt : "+keptncontext);
+															keptncontext=keptncontext.replaceAll("\"","");
+															Optional<String> datacontent = Optional.ofNullable(req.getHeader(HEADER_datacontentype));
+															Optional<String> shkeptnspecversion=Optional.ofNullable(req.getHeader(HEADER_shkeptnspecversion));
+															Optional<String> triggeredid=Optional.ofNullable(req.getHeader(HEADER_triggeredid));
+															keptnExtensions=new KeptnExtensions(keptncontext,datacontent,triggeredid,shkeptnspecversion);
+
+														}
 														loger.setKepncontext(keptncontext);
 														loger.debug("Received data " + eventFinished.toString());
 														if(lisofKeptnContext.contains(keptncontext))
@@ -96,6 +113,7 @@ public class CloudEventNeoload extends AbstractVerticle {
 															KeptnExtensions finalKeptnExtensions = keptnExtensions;
 															req.response().setStatusCode(200).putHeader("content-type", "text/plain").end("event received");
 
+															String finalKeptncontext = keptncontext;
 															vertx.<String>executeBlocking(
 																	future -> {
 																		String result;
@@ -105,7 +123,7 @@ public class CloudEventNeoload extends AbstractVerticle {
 
 																			neoLoadHandler.runNeoLoadTest(rxvertx, receivedEvent);
 																			result = "test has finished";
-																			lisofKeptnContext.remove(keptncontext);
+																			lisofKeptnContext.remove(finalKeptncontext);
 																			future.complete(result);
 																		} catch (Exception e) {
 																			result = "Exception :" + e.getMessage();
@@ -129,15 +147,25 @@ public class CloudEventNeoload extends AbstractVerticle {
 													}
 													else
 													{
+														System.out.println("Found no extension in the even");
 														req.response().setStatusCode(401).end("Unable to find Extensions in CLoud evnet");
 														return;
 													}
 												}
+												else
+												{
+													System.out.println("The Data is not Json Object");
+												}
 											}
 											catch (Exception e)
 											{
+												e.printStackTrace();
 												req.response().setStatusCode(410).end("Exception :"+e.getMessage());
 											}
+										}
+										else
+										{
+											System.out.println("No data found in the event");
 										}
 
 

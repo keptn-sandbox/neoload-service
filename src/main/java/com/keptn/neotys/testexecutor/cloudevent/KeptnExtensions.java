@@ -3,6 +3,7 @@ package com.keptn.neotys.testexecutor.cloudevent;
 import io.cloudevents.Extension;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class KeptnExtensions implements Extension {
 
@@ -11,12 +12,28 @@ public class KeptnExtensions implements Extension {
     private String triggeredid;
     private String shkeptnspecversion;
 
+
+
     //Mandatory to let cloud-events lib instatiate class
-    public KeptnExtensions(String shkeptncontext, String contenttype, String triggeredid, String shkeptnspecversion) {
-        this.contenttype=contenttype;
+    public KeptnExtensions()
+    {
+
+    }
+    public KeptnExtensions(String shkeptncontext, Optional<String> contenttype,  Optional<String> triggeredid,  Optional<String> shkeptnspecversion) {
+        if(contenttype.isPresent()) {
+            this.contenttype = contenttype.get();
+            this.contenttype=this.contenttype.replaceAll("\"","");
+        }
+        if(triggeredid.isPresent()) {
+            this.triggeredid = triggeredid.get();
+            this.triggeredid=this.triggeredid.replaceAll("\"","");
+        }
         this.shkeptncontext=shkeptncontext;
-        this.triggeredid=triggeredid;
-        this.shkeptnspecversion=shkeptnspecversion;
+
+        if(shkeptnspecversion.isPresent()) {
+            this.shkeptnspecversion = shkeptnspecversion.get();
+            this.shkeptnspecversion=this.shkeptnspecversion.replaceAll("\"","");
+        }
     }
 
     public KeptnExtensions(final String shkeptncontext, final String datacontenttype) {
