@@ -16,24 +16,18 @@ public class TestexecutorApplicationTests {
 		String yaml ="workloads:\n" +
 				"- teststrategy: performance\n" +
 				"  script:\n" +
-				"    repository: https://github.com/keptn-orders/keptn-onboarding.git\n" +
-				"    branch: neoload\n" +
-				"    project:\n" +
-				"    - path: /frontend/neoload/frontend_basic.yaml\n" +
-				"    - path: /frontend/neoload/production/frontend_scenario.yaml\n" +
-				"    - path: /frontend/neoload/load_template/load_template.nlp\n" +
+				"     repository: https://<surl>/neoload-perftest\n" +
+				"     branch: master\n" +
+				"     issecured: true\n"+
+				"     project:\n" +
+				"     - path: /tassitd/TAS_SM_CombinedFinal.nlp\n" +
+				"  description: SitdTas\n" +
 				"  properties:\n" +
-				"    scenario: FrontLoad\n" +
-				"    constant_variables:\n" +
-				"    - name: server_host\n" +
-				"      value: frontend.keptnorder-production.svc.cluster.local\n" +
-				"    - name: server_port\n" +
-				"      value: 80\n" +
-				"  description: FrontLoad\n" +
+				"    scenario: KeptnTest\n" +
 				"  infrastructure:\n" +
 				"    managedbyKeptn: false\n" +
-				"    numberOfMachine: 1\n" +
-				"    zoneId: cz104";
+				"    numberOfMachine: 2\n" +
+				"    zoneId : 4KBFT\n";
 
 		InputStream targetStream = new ByteArrayInputStream(yaml.getBytes());
 

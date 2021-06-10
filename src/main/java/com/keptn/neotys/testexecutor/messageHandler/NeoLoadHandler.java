@@ -609,7 +609,7 @@ public class NeoLoadHandler {
                     logger.debug("Clonning repo :"+step.getScript().getRepository());
 
                     try {
-                        gitfolder=getNeoLoadTestFolder(getGitHubFolder(step.getScript().getRepository()),step.getScript().getBranch(),step.getScript().isSecured());
+                        gitfolder=getNeoLoadTestFolder(getGitHubFolder(step.getScript().getRepository()),step.getScript().getBranch(),step.getScript().isIssecured());
                     } catch (IOException e) {
                         error.append("Technical Error while retrieveing repository "+e.getMessage());
                     } catch (NeoLoadJgitExeption neoLoadJgitExeption) {
@@ -642,7 +642,7 @@ public class NeoLoadHandler {
 
 
 
-    private Path getNeoLoadTestFolder(String ressource, String branch, Boolean secured)
+    private Path getNeoLoadTestFolder(String ressource, String branch, boolean secured)
     {
         try {
              Optional<String> scm_user;

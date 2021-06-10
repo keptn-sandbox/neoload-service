@@ -9,34 +9,29 @@ import static com.keptn.neotys.testexecutor.conf.NeoLoadConfiguration.DEFAULT_BR
 public class TestingScript {
     String branch;
     String repository;
-    Boolean isSecured;
+    boolean issecured;
     List<Project> project;
 
-    public TestingScript(String branch, String repository,Boolean isSecured, List<Project> project) {
+    public TestingScript(String branch, String repository,boolean issecured, List<Project> project) {
         this.branch = branch;
         this.repository = repository;
         this.project = project;
-
-        if(isSecured == null)
-            this.isSecured=false;
-        else
-            this.isSecured=isSecured;
+        this.issecured =issecured;
     }
-
-    public Boolean isSecured() {
-        if(isSecured==null)
-            return false;
-        else
-            return isSecured;
-    }
-
-    public void setSecured(Boolean secured) {
-        isSecured = secured;
-    }
-
     public TestingScript() {
         project = new ArrayList<>();
+        this.issecured =false;
     }
+
+
+    public boolean isIssecured() {
+            return issecured;
+    }
+
+    public void setIssecured(boolean issecured) {
+        this.issecured = issecured;
+    }
+
 
     public String getBranch() {
         if(branch==null)
@@ -69,9 +64,9 @@ public class TestingScript {
     public String toString() {
         return "TestingScript{" +
                 "repository='" + repository + '\'' +
-                ",issecured="+isSecured().toString() +
+                ",issecured="+String.valueOf(isIssecured()) +
                 ",branch='"+ getBranch() +"\'"+
-                ", project=" + "[" +project.stream().map(project1 -> {return project1.toString();}).collect(Collectors.joining(",")) +"]"+
+                ",project=" + "[" +project.stream().map(project1 -> {return project1.toString();}).collect(Collectors.joining(",")) +"]"+
                 '}';
     }
 }
