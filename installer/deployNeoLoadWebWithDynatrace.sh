@@ -7,7 +7,7 @@
 ####  -u -> login user to connect to the Source control containing the NeoLoad test scripts
 ####  -p -> password to connect to the source control containing the NeoLoad test scripts
 ####################################"
-while getopts n:c:l:u:p option
+while getopts n:c:l:u:p: option
 do
  case "${option}"
  in
