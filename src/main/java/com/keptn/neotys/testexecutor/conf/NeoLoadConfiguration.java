@@ -36,8 +36,8 @@ public class NeoLoadConfiguration {
     public static final String SECRET_DT_TENANT="DT_TENANT";
     public static final String SECRET_KEPTN_NAMESPACE="KEPTN_NAMESPACE";
     public static final String NEOLOAD_CONFIG_FILE_OPTION2=NEOLOAD_Product+"%2F"+NEOLOAD_CONFIG_FILE;
-    public static final String SECRET_SCM_USER="SCM_USER";
-    public static final String SECRET_SCM_PASSWORD="SCM_PASSWORD";
+    public static final String SECRET_SCM_USER="SECRET_SCM_USER";
+    public static final String SECRET_SCM_PASSWORD="SECRET_SCM_PASSWORD";
     public static final String SECRET_KEPTN_API_TOKEN="KP_API_TOKEN";
 
     public static final String SECRET_NL_CONTROLLER_DCK_IMMAGE="NL_DOCKER_CTL_IMAGE";

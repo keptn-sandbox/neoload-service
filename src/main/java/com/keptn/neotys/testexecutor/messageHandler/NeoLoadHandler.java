@@ -87,19 +87,28 @@ public class NeoLoadHandler {
                 logger.debug("Ressource file found " + resourceObject.getResourceURI());
                 String yaml = resourceObject.getDecodedRessourceContent();
                 logger.debug("YAML received : "+yaml);
-                NeoLoadDataModel neoLoadDataModel = new Yaml().loadAs(yaml, NeoLoadDataModel.class);
-                if (neoLoadDataModel == null) {
-                    logger.debug("getNeoLoadTest - no able to deserialize the yaml file");
-                    listFuture.fail(new NeoLoadSerialException("Unable to deserialize YAML file "));
+                try {
+                    NeoLoadDataModel neoLoadDataModel = new Yaml().loadAs(yaml, NeoLoadDataModel.class);
+                    if (neoLoadDataModel == null) {
+                        logger.debug("getNeoLoadTest - no able to deserialize the yaml file");
+                        listFuture.fail(new NeoLoadSerialException("Unable to deserialize YAML file "));
+                    }
+                    if (neoLoadDataModel.getWorkloads().size() < 0) {
+                        logger.debug("getNeoLoadTest - there is no testing steps");
+                        listFuture.fail(new NeoLoadJgitExeption("There is no testing steps define "));
+
+                    }
+                    logger.debug("Found "+ String.valueOf(neoLoadDataModel.getWorkloads().size()) +" steps in the workload file");
+                    final ArrayList<NeoLoadTestStep> neoLoadTestSteps = new ArrayList<>();
+                    listFuture.complete(neoLoadDataModel.getWorkloads());
                 }
-                if (neoLoadDataModel.getWorkloads().size() < 0) {
-                    logger.debug("getNeoLoadTest - there is no testing steps");
-                    listFuture.fail(new NeoLoadJgitExeption("There is no testing steps define "));
+                catch (Exception e)
+                {
+                    logger.error("Technical error when converting the workload ",e);
+                    listFuture.fail(new NeoLoadSerialException("Unable to deserialize YAML file "+e.getMessage()));
 
                 }
 
-                final ArrayList<NeoLoadTestStep> neoLoadTestSteps = new ArrayList<>();
-                listFuture.complete(neoLoadDataModel.getWorkloads());
             } else {
                 logger.error("No Ressrouce " + NEOLOAD_CONFIG_FILE + " found for project " + keptnEventFinished.getProject() + " and stage " + keptnEventFinished.getStage());
                 logger.info("trying to  " + NEOLOAD_CONFIG_FILE + " found for project " + keptnEventFinished.getProject() + " and stage " + keptnEventFinished.getStage());
@@ -657,7 +666,7 @@ public class NeoLoadHandler {
 
                  Git result;
                  if(secured) {
-                     if (scm_user.isPresent() && !scm_user.get().isEmpty() && scm_password.isPresent() && scm_password.get().isEmpty()) {
+                     if (scm_user.isPresent() &&  scm_password.isPresent() ) {
                          logger.debug("Clone the repo without using credentials");
                          result = Git.cloneRepository()
                                  .setURI(getGitHubFolder(ressource))
